@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.synclevel">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%String</Super>
+<TimeCreated>64370,42609.051568</TimeCreated>
+
+<Parameter name="MAXLEN">
+</Parameter>
+
+<Parameter name="VALUELIST">
+<Default>,0,1,infinity</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>sync-level</Default>
+</Parameter>
+
+<Parameter name="XMLTYPE">
+<Default>sync-level</Default>
+</Parameter>
+</Class>
+</Export>

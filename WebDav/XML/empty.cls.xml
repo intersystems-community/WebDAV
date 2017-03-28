@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.empty">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.004284</TimeCreated>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="XMLUSEEMPTYELEMENT">
+<Default>1</Default>
+</Parameter>
+</Class>
+</Export>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.lockinfo">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.015804</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>lockinfo</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="lockscope">
+<Type>WebDav.XML.lockscope</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="lockscope"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="locktype">
+<Type>WebDav.XML.locktype</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="locktype"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="owner">
+<Type>WebDav.XML.owner</Type>
+<Parameter name="XMLNAME" value="owner"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>

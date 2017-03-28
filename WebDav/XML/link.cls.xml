@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.link">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.012128</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>link</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="src">
+<Type>%String</Type>
+<Collection>list</Collection>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="src"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="dst">
+<Type>%String</Type>
+<Collection>list</Collection>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="dst"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>

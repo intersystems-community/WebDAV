@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.propertybehavior">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.027581</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>propertybehavior</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="omit">
+<Type>WebDav.XML.omit</Type>
+<Parameter name="XMLNAME" value="omit"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="keepalive">
+<Type>WebDav.XML.keepalive</Type>
+<Parameter name="XMLNAME" value="keepalive"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>

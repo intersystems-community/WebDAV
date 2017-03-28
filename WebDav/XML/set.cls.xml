@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.set">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<SqlTableName>_set</SqlTableName>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.043281</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>set</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="prop">
+<Type>WebDav.XML.prop</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="prop"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>

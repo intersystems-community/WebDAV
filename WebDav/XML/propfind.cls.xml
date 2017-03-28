@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.propfind">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.0303</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>propfind</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="allprop">
+<Type>WebDav.XML.allprop</Type>
+<Parameter name="XMLNAME" value="allprop"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="propname">
+<Type>WebDav.XML.propname</Type>
+<Parameter name="XMLNAME" value="propname"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="prop">
+<Type>WebDav.XML.prop</Type>
+<Parameter name="XMLNAME" value="prop"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>

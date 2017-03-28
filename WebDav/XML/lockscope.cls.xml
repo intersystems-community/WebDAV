@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.lockscope">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.017245</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>lockscope</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="exclusive">
+<Type>WebDav.XML.empty</Type>
+<Parameter name="XMLNAME" value="exclusive"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="shared">
+<Type>WebDav.XML.empty</Type>
+<Parameter name="XMLNAME" value="shared"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>

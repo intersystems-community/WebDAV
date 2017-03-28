@@ -15,7 +15,6 @@
 <XData name="UrlMap">
 <Data><![CDATA[
 <Routes>
-	<!-- Send objects in this format: {"MDX":"QUERY"} HTTP method: POST -->
 
    <Route Url="(.*)" Method="PROPFIND" Call="PROPFIND"/>
    
@@ -46,14 +45,14 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
-	set depth = 0
+	set depth = 1
 	if $isobject($g(%request))  {
 		set %response.Status = "207 Multi Status"
 		
 		set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)
 		
-			set depth = 3
-			write ..getClassXData(,"P" _ depth)   return 1
+			//set depth = 3
+			//write ..getClassXData(,"P" _ depth)   return 1
 				
 	}
 
@@ -61,25 +60,46 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	s ^dbg($i(^dbg)) = $lb(href, depth)
 		
 	set multi = ##class(WebDav.XML.multistatus).%New()
-	set response = ##class(WebDav.XML.response).%New()
-	do response.href.Insert("http://localhost:57772/WebDAV/2/")
+	do multi.response.Insert(..CreateResponse(2, $$$YES))
 	
-	set propstat = ##class(WebDav.XML.propstat).%New()
-	set propstat.status = "HTTP/1.1 200 OK"
-	
-	set prop = ##class(WebDav.XML.prop).%New()
-	set prop.getlastmodified = $p($zdt($h,5), " ") _ ", " _ $zdt($h,2) _ " GMT"
-	//set prop.
-	
-	set propstat.prop = prop
-	do response.propstat.Insert(propstat)
-	do multi.response.Insert(response)
+	if depth {
+		do multi.response.Insert(..CreateResponse("2/1.txt", $$$NO))
+		do multi.response.Insert(..CreateResponse("2/2.txt", $$$NO))
+	}
 	
 	set w=##class(%XML.Writer).%New()
 	set w.DefaultNamespace = "DAV:"
  	set w.Indent=1
 
  	return w.RootObject(multi)
+]]></Implementation>
+</Method>
+
+<Method name="CreateResponse">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href,isCollection</FormalSpec>
+<ReturnType>WebDav.XML.response</ReturnType>
+<Implementation><![CDATA[
+	set response = ##class(WebDav.XML.response).%New()
+	do response.href.Insert("http://localhost:57772/WebDAV/" _ href)
+	
+	set propstat = ##class(WebDav.XML.propstat).%New()
+	set propstat.status = "HTTP/1.1 200 OK"
+	
+	set prop = ##class(WebDav.XML.prop).%New()
+	set prop.getlastmodified = "Mon, 27 Mar 2017 11:54:36 GMT" // $p($zdt($h,5), " ") _ ", " _ $zdt($h,2) _ " GMT"
+	set prop.displayname = $case(isCollection, 1: href, :##class(%File).GetFilename(href))
+	set prop.iscollection = isCollection
+	set prop.creationdate = prop.getlastmodified
+	
+	if isCollection {
+		set prop.resourcetype.collection = ##class(WebDav.XML.empty).%New()
+	}
+	
+	set propstat.prop = prop
+	do response.propstat.Insert(propstat)
+	
+	return response
 ]]></Implementation>
 </Method>
 
@@ -352,6 +372,53 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 </D:propstat>
 </D:response>
 </D:multistatus>
+]]></Data>
+</XData>
+
+<XData name="P3">
+<Data><![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<multistatus xmlns="DAV:">
+<response>
+<href>http://localhost:57772/WebDav/2/</href>
+<propstat>
+<status>HTTP/1.1 200 OK</status>
+<prop>
+<getcontenttype></getcontenttype>
+<getlastmodified>Mon, 27 Mar 2017 11:54:36 GMT</getlastmodified>
+<lockdiscovery/>
+<ishidden>0</ishidden>
+<supportedlock>
+<lockentry>
+<lockscope>
+<exclusive/>
+</lockscope>
+<locktype>
+<write/>
+</locktype>
+</lockentry>
+<lockentry>
+<lockscope>
+<shared/>
+</lockscope>
+<locktype>
+<write/>
+</locktype>
+</lockentry>
+</supportedlock>
+<getetag/>
+<displayname>2</displayname>
+<getcontentlanguage/>
+<getcontentlength>0</getcontentlength>
+<iscollection>1</iscollection>
+<creationdate>2017-03-27T08:48:41.151Z</creationdate>
+<resourcetype>
+<collection/>
+</resourcetype>
+</prop>
+</propstat>
+</response>
+</multistatus>
 ]]></Data>
 </XData>
 </Class>

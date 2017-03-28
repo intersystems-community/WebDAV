@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.prop">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.024135</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>prop</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="XMLUSEEMPTYELEMENT">
+<Default>1</Default>
+</Parameter>
+
+<Property name="getcontenttype">
+<Type>%String</Type>
+<Parameter name="XMLNAME" value="getcontenttype"/>
+<Parameter name="XMLREF" value="0"/>
+</Property>
+
+<Property name="getlastmodified">
+<Type>%String</Type>
+<Parameter name="XMLNAME" value="getlastmodified"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="lockdiscovery">
+<Type>WebDav.XML.lockdiscovery</Type>
+<InitialExpression>##class(WebDav.XML.lockdiscovery).%New()</InitialExpression>
+<Parameter name="XMLNAME" value="lockdiscovery"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="ishidden">
+<Description>
+0,1</Description>
+<Type>%Integer</Type>
+<InitialExpression>$$$NO</InitialExpression>
+</Property>
+
+<Property name="supportedlock">
+<Type>WebDav.XML.supportedlock</Type>
+<InitialExpression>##class(WebDav.XML.supportedlock).%New()</InitialExpression>
+<Parameter name="XMLNAME" value="supportedlock"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="getetag">
+<Type>%String</Type>
+<Parameter name="XMLNAME" value="getetag"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="displayname">
+<Type>%String</Type>
+<Parameter name="XMLNAME" value="displayname"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="getcontentlanguage">
+<Type>%String</Type>
+<Parameter name="XMLNAME" value="getcontentlanguage"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="getcontentlength">
+<Type>%Integer</Type>
+<Parameter name="XMLNAME" value="getcontentlength"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="iscollection">
+<Description>
+0 - file , 1 - dir</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="creationdate">
+<Type>%String</Type>
+<Parameter name="XMLNAME" value="creationdate"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="resourcetype">
+<Type>WebDav.XML.resourcetype</Type>
+<InitialExpression>##class(WebDav.XML.resourcetype).%New()</InitialExpression>
+<Parameter name="XMLNAME" value="resourcetype"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="supportedreportset">
+<Type>WebDav.XML.supportedreportset</Type>
+<Parameter name="XMLNAME" value="supported-report-set"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="quotaavailablebytes">
+<Type>WebDav.XML.quotaavailablebytes</Type>
+<Parameter name="XMLNAME" value="quota-available-bytes"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="quotausedbytes">
+<Type>WebDav.XML.quotausedbytes</Type>
+<Parameter name="XMLNAME" value="quota-used-bytes"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>

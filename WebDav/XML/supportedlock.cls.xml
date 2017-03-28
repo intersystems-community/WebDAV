@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.supportedlock">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.046405</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>supportedlock</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="lockentry">
+<Type>WebDav.XML.lockentry</Type>
+<Collection>list</Collection>
+<Parameter name="XMLNAME" value="lockentry"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Method name="%OnNew">
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	set exclusive = ##class(WebDav.XML.lockentry).%New()
+	set exclusive.lockscope.exclusive = ##class(WebDav.XML.empty).%New()
+	//set exclusive.locktype.write = ##class(WebDav.XML.write).%New()
+
+	set shared = ##class(WebDav.XML.lockentry).%New()
+	set shared.lockscope.shared = ##class(WebDav.XML.empty).%New()
+	//set shared.locktype.write = ##class(WebDav.XML.write).%New()	
+	
+	do ..lockentry.Insert(exclusive)
+	do ..lockentry.Insert(shared)
+	
+	quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

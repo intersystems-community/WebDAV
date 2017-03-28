@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.activelock">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42608.991978</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>activelock</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="lockscope">
+<Type>WebDav.XML.lockscope</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="lockscope"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="locktype">
+<Type>WebDav.XML.locktype</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="locktype"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="depth">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="depth"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="owner">
+<Type>WebDav.XML.owner</Type>
+<Parameter name="XMLNAME" value="owner"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="timeout">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="timeout"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="locktoken">
+<Type>WebDav.XML.locktoken</Type>
+<Parameter name="XMLNAME" value="locktoken"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>

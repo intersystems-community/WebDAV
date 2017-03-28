@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.propertyupdate">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.028974</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>propertyupdate</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="remove">
+<Type>WebDav.XML.remove</Type>
+<Collection>list</Collection>
+<Parameter name="XMLNAME" value="remove"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="set">
+<Type>WebDav.XML.set</Type>
+<Collection>list</Collection>
+<SqlFieldName>_set</SqlFieldName>
+<Parameter name="XMLNAME" value="set"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>

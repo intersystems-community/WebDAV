@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.locktype">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.019612</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>locktype</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="XMLUSEEMPTYELEMENT">
+<Default>1</Default>
+</Parameter>
+
+<Property name="write">
+<Type>%String</Type>
+<Required>1</Required>
+<SqlFieldName>_write</SqlFieldName>
+<Parameter name="XMLNAME" value="write"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>

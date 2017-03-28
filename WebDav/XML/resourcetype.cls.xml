@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.resourcetype">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.038968</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>resourcetype</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="XMLUSEEMPTYELEMENT">
+<Default>1</Default>
+</Parameter>
+
+<Property name="collection">
+<Type>WebDav.XML.empty</Type>
+<Parameter name="XMLNAME" value="collection"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="any">
+<Type>%XML.String</Type>
+<Collection>list</Collection>
+<SqlFieldName>_any</SqlFieldName>
+<Parameter name="XMLNAME" value="any"/>
+<Parameter name="XMLPROJECTION" value="ANY"/>
+</Property>
+</Class>
+</Export>

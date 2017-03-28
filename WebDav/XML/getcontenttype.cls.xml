@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.getcontenttype">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.007334</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>getcontenttype</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="content">
+<Type>%XML.String</Type>
+<Parameter name="XMLNAME" value="content"/>
+<Parameter name="XMLPROJECTION" value="CONTENT"/>
+</Property>
+</Class>
+</Export>

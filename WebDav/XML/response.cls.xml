@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.response">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.040252</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>response</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="href">
+<Type>%String</Type>
+<Collection>list</Collection>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="href"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Property status As %String(MAXLEN = "", XMLNAME = "status", XMLREF = 1);
+
+]]></Content>
+</UDLText>
+
+<Property name="propstat">
+<Type>WebDav.XML.propstat</Type>
+<Collection>list</Collection>
+<Parameter name="XMLNAME" value="propstat"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<Property name="error">
+<Type>WebDav.XML.error</Type>
+<Parameter name="XMLNAME" value="error"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Property responsedescription As %String(MAXLEN = "", XMLNAME = "responsedescription", XMLREF = 1);
+
+]]></Content>
+</UDLText>
+</Class>
+</Export>
