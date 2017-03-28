@@ -17,23 +17,22 @@
 <Routes>
 	<!-- Send objects in this format: {"MDX":"QUERY"} HTTP method: POST -->
 
-   <Route Url="/:href" Method="PROPFIND" Call="PROPFIND"/>
-   <Route Url="/:href/" Method="PROPFIND" Call="PROPFIND"/>
+   <Route Url="(.*)" Method="PROPFIND" Call="PROPFIND"/>
    
    <!-- UNMIPLEMENTED -->
-   <Route Url="/:href" Method="GET" Call="GET"/>
-   <Route Url="/:href" Method="HEAD" Call="HEAD"/>
-   <Route Url="/:href" Method="POST" Call="POST"/>
-   <Route Url="/:href" Method="PUT" Call="PUT"/>
-   <Route Url="/:href" Method="DELETE" Call="DELETE"/>
-   <Route Url="/:href" Method="TRACE" Call="TRACE"/>
-   <Route Url="/:href" Method="COPY" Call="COPY"/>
-   <Route Url="/:href" Method="MOVE" Call="MOVE"/>
-   <Route Url="/:href" Method="MKCOL" Call="MKCOL"/>
-   <Route Url="/:href" Method="PROPPATCH" Call="PROPPATCH"/>
-   <Route Url="/:href" Method="LOCK" Call="LOCK"/>
-   <Route Url="/:href" Method="UNLOCK" Call="UNLOCK"/>
-   <Route Url="/:href" Method="ORDERPATCH" Call="ORDERPATCH"/>
+   <Route Url="(.*)" Method="GET" Call="GET"/>
+   <Route Url="(.*)" Method="HEAD" Call="HEAD"/>
+   <Route Url="(.*)" Method="POST" Call="POST"/>
+   <Route Url="(.*)" Method="PUT" Call="PUT"/>
+   <Route Url="(.*)" Method="DELETE" Call="DELETE"/>
+   <Route Url="(.*)" Method="TRACE" Call="TRACE"/>
+   <Route Url="(.*)" Method="COPY" Call="COPY"/>
+   <Route Url="(.*)" Method="MOVE" Call="MOVE"/>
+   <Route Url="(.*)" Method="MKCOL" Call="MKCOL"/>
+   <Route Url="(.*)" Method="PROPPATCH" Call="PROPPATCH"/>
+   <Route Url="(.*)" Method="LOCK" Call="LOCK"/>
+   <Route Url="(.*)" Method="UNLOCK" Call="UNLOCK"/>
+   <Route Url="(.*)" Method="ORDERPATCH" Call="ORDERPATCH"/>
  </Routes>
 ]]></Data>
 </XData>
@@ -52,9 +51,12 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 		set %response.Status = "207 Multi Status"
 		
 		set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)
+		
+			set depth = 3
+			write ..getClassXData(,"P" _ depth)   return 1
 				
 	}
-	write ..getClassXData(,"P" _ depth)   q 1
+
 	
 	s ^dbg($i(^dbg)) = $lb(href, depth)
 		
@@ -65,13 +67,29 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	set propstat = ##class(WebDav.XML.propstat).%New()
 	set propstat.status = "HTTP/1.1 200 OK"
 	
+	set prop = ##class(WebDav.XML.prop).%New()
+	set prop.getlastmodified = $p($zdt($h,5), " ") _ ", " _ $zdt($h,2) _ " GMT"
+	//set prop.
+	
+	set propstat.prop = prop
 	do response.propstat.Insert(propstat)
 	do multi.response.Insert(response)
 	
 	set w=##class(%XML.Writer).%New()
 	set w.DefaultNamespace = "DAV:"
  	set w.Indent=1
+
  	return w.RootObject(multi)
+]]></Implementation>
+</Method>
+
+<Method name="GET">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[
+	w "<xml/>"
+	s ^dbg($i(^dbg)) = $g(href)
+	q 1
 ]]></Implementation>
 </Method>
 
