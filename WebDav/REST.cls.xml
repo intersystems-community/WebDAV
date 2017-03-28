@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.REST">
+<Super>%CSP.REST</Super>
+<TimeCreated>64370,45626.334444</TimeCreated>
+
+<Parameter name="HandleCorsRequest">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/xml</Default>
+</Parameter>
+
+<XData name="UrlMap">
+<Data><![CDATA[
+<Routes>
+	<!-- Send objects in this format: {"MDX":"QUERY"} HTTP method: POST -->
+
+   <Route Url="/:href" Method="PROPFIND" Call="PROPFIND"/>
+   <Route Url="/:href/" Method="PROPFIND" Call="PROPFIND"/>
+   
+   <!-- UNMIPLEMENTED -->
+   <Route Url="/:href" Method="GET" Call="GET"/>
+   <Route Url="/:href" Method="HEAD" Call="HEAD"/>
+   <Route Url="/:href" Method="POST" Call="POST"/>
+   <Route Url="/:href" Method="PUT" Call="PUT"/>
+   <Route Url="/:href" Method="DELETE" Call="DELETE"/>
+   <Route Url="/:href" Method="TRACE" Call="TRACE"/>
+   <Route Url="/:href" Method="COPY" Call="COPY"/>
+   <Route Url="/:href" Method="MOVE" Call="MOVE"/>
+   <Route Url="/:href" Method="MKCOL" Call="MKCOL"/>
+   <Route Url="/:href" Method="PROPPATCH" Call="PROPPATCH"/>
+   <Route Url="/:href" Method="LOCK" Call="LOCK"/>
+   <Route Url="/:href" Method="UNLOCK" Call="UNLOCK"/>
+   <Route Url="/:href" Method="ORDERPATCH" Call="ORDERPATCH"/>
+ </Routes>
+]]></Data>
+</XData>
+
+<Method name="PROPFIND">
+<Description>
+w ##class(WebDav.REST).PROPFIND()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[
+	
+	#dim %response As %CSP.Response
+	#dim %request As %CSP.Request
+	set depth = 0
+	if $isobject($g(%request))  {
+		set %response.Status = "207 Multi Status"
+		
+		set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)
+				
+	}
+	write ..getClassXData(,"P" _ depth)   q 1
+	
+	s ^dbg($i(^dbg)) = $lb(href, depth)
+		
+	set multi = ##class(WebDav.XML.multistatus).%New()
+	set response = ##class(WebDav.XML.response).%New()
+	do response.href.Insert("http://localhost:57772/WebDAV/2/")
+	
+	set propstat = ##class(WebDav.XML.propstat).%New()
+	set propstat.status = "HTTP/1.1 200 OK"
+	
+	do response.propstat.Insert(propstat)
+	do multi.response.Insert(response)
+	
+	set w=##class(%XML.Writer).%New()
+	set w.DefaultNamespace = "DAV:"
+ 	set w.Indent=1
+ 	return w.RootObject(multi)
+]]></Implementation>
+</Method>
+
+<Method name="getClassXData">
+<Description>
+Возвращает содержимое блока XData с именем xdataName из указанного класса</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>className=$classname(),xdataName</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	quit ##class(%Dictionary.CompiledXData).%OpenId(className _ "||" _ xdataName).Data.Read($$$MaxLocalLength)
+]]></Implementation>
+</Method>
+
+<XData name="PROPFIND">
+<Data><![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<D:multistatus xmlns:D="DAV:">
+<D:response>
+<D:href>http://localhost:57772/WebDAV</D:href>
+<D:propstat>
+<D:status>HTTP/1.1 200 OK</D:status>
+<D:prop>
+<D:getcontenttype/>
+<D:getlastmodified>Mon, 27 Mar 2017 10:40:29 GMT</D:getlastmodified>
+<D:lockdiscovery/>
+<D:ishidden>0</D:ishidden>
+<D:supportedlock>
+<D:lockentry>
+<D:lockscope>
+<D:exclusive/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+<D:lockentry>
+<D:lockscope>
+<D:shared/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+</D:supportedlock>
+<D:getetag/>
+<D:displayname>2</D:displayname>
+<D:getcontentlanguage/>
+<D:getcontentlength>0</D:getcontentlength>
+<D:iscollection>1</D:iscollection>
+<D:creationdate>2017-03-27T08:48:41.151Z</D:creationdate>
+<D:resourcetype>
+<D:collection/>
+</D:resourcetype>
+</D:prop>
+</D:propstat>
+</D:response>
+<D:response>
+<D:href>http://localhost:57772/WebDAV/1.docx</D:href>
+<D:propstat>
+<D:status>HTTP/1.1 200 OK</D:status>
+<D:prop>
+<D:getcontenttype>application/vnd.openxmlformats-officedocument.wordprocessingml.document</D:getcontenttype>
+<D:getlastmodified>Mon, 27 Mar 2017 08:49:32 GMT</D:getlastmodified>
+<D:lockdiscovery/>
+<D:ishidden>0</D:ishidden>
+<D:supportedlock>
+<D:lockentry>
+<D:lockscope>
+<D:exclusive/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+<D:lockentry>
+<D:lockscope>
+<D:shared/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+</D:supportedlock>
+<D:getetag>"fd2b9dd7a6d21:0"</D:getetag>
+<D:displayname>1.docx</D:displayname>
+<D:getcontentlanguage/>
+<D:getcontentlength>11640</D:getcontentlength>
+<D:iscollection>0</D:iscollection>
+<D:creationdate>2017-03-27T08:49:32.47Z</D:creationdate>
+<D:resourcetype/>
+</D:prop>
+</D:propstat>
+</D:response>
+<D:response>
+<D:href>http://localhost:57772/WebDAV/1.txt</D:href>
+<D:propstat>
+<D:status>HTTP/1.1 200 OK</D:status>
+<D:prop>
+<D:getcontenttype>text/plain</D:getcontenttype>
+<D:getlastmodified>Mon, 27 Mar 2017 08:54:44 GMT</D:getlastmodified>
+<D:lockdiscovery/>
+<D:ishidden>0</D:ishidden>
+<D:supportedlock>
+<D:lockentry>
+<D:lockscope>
+<D:exclusive/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+<D:lockentry>
+<D:lockscope>
+<D:shared/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+</D:supportedlock>
+<D:getetag>"1155a5c7d7a6d21:0"</D:getetag>
+<D:displayname>1.txt</D:displayname>
+<D:getcontentlanguage/>
+<D:getcontentlength>3</D:getcontentlength>
+<D:iscollection>0</D:iscollection>
+<D:creationdate>2017-03-27T08:49:37.715Z</D:creationdate>
+<D:resourcetype/>
+</D:prop>
+</D:propstat>
+</D:response>
+</D:multistatus>
+]]></Data>
+</XData>
+
+<XData name="P0">
+<Data><![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<D:multistatus xmlns:D="DAV:">
+<D:response>
+<D:href>http://localhost:57772/WebDav/2/</D:href>
+<D:propstat>
+<D:status>HTTP/1.1 200 OK</D:status>
+<D:prop>
+<D:getcontenttype/>
+<D:getlastmodified>Mon, 27 Mar 2017 11:54:36 GMT</D:getlastmodified>
+<D:lockdiscovery/>
+<D:ishidden>0</D:ishidden>
+<D:supportedlock>
+<D:lockentry>
+<D:lockscope>
+<D:exclusive/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+<D:lockentry>
+<D:lockscope>
+<D:shared/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+</D:supportedlock>
+<D:getetag/>
+<D:displayname>2</D:displayname>
+<D:getcontentlanguage/>
+<D:getcontentlength>0</D:getcontentlength>
+<D:iscollection>1</D:iscollection>
+<D:creationdate>2017-03-27T08:48:41.151Z</D:creationdate>
+<D:resourcetype>
+<D:collection/>
+</D:resourcetype>
+</D:prop>
+</D:propstat>
+</D:response>
+</D:multistatus>
+]]></Data>
+</XData>
+
+<XData name="P1">
+<Data><![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<D:multistatus xmlns:D="DAV:">
+<D:response>
+<D:href>http://37.139.9.166:57774/WebDav/3/</D:href>
+<D:propstat>
+<D:status>HTTP/1.1 200 OK</D:status>
+<D:prop>
+<D:getcontenttype/>
+<D:getlastmodified>Mon, 27 Mar 2017 11:54:36 GMT</D:getlastmodified>
+<D:lockdiscovery/>
+<D:ishidden>0</D:ishidden>
+<D:supportedlock>
+<D:lockentry>
+<D:lockscope>
+<D:exclusive/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+<D:lockentry>
+<D:lockscope>
+<D:shared/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+</D:supportedlock>
+<D:getetag/>
+<D:displayname>2</D:displayname>
+<D:getcontentlanguage/>
+<D:getcontentlength>0</D:getcontentlength>
+<D:iscollection>1</D:iscollection>
+<D:creationdate>2017-03-27T08:48:41.151Z</D:creationdate>
+<D:resourcetype>
+<D:collection/>
+</D:resourcetype>
+</D:prop>
+</D:propstat>
+</D:response>
+<D:response>
+<D:href>http://37.139.9.166:57774/WebDAV/3/1.txt</D:href>
+<D:propstat>
+<D:status>HTTP/1.1 200 OK</D:status>
+<D:prop>
+<D:getcontenttype>text/plain</D:getcontenttype>
+<D:getlastmodified>Mon, 27 Mar 2017 08:54:44 GMT</D:getlastmodified>
+<D:lockdiscovery/>
+<D:ishidden>0</D:ishidden>
+<D:supportedlock>
+<D:lockentry>
+<D:lockscope>
+<D:exclusive/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+<D:lockentry>
+<D:lockscope>
+<D:shared/>
+</D:lockscope>
+<D:locktype>
+<D:write/>
+</D:locktype>
+</D:lockentry>
+</D:supportedlock>
+<D:getetag>"1155a5c7d7a6d21:0"</D:getetag>
+<D:displayname>1.txt</D:displayname>
+<D:getcontentlanguage/>
+<D:getcontentlength>3</D:getcontentlength>
+<D:iscollection>0</D:iscollection>
+<D:creationdate>2017-03-27T08:49:37.715Z</D:creationdate>
+<D:resourcetype/>
+</D:prop>
+</D:propstat>
+</D:response>
+</D:multistatus>
+]]></Data>
+</XData>
+</Class>
+</Export>
