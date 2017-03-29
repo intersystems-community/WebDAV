@@ -40,6 +40,25 @@
 ]]></Data>
 </XData>
 
+<Method name="OnPreDispatch">
+<Description>
+This method Gets called prior to dispatch of the request. Put any common code here
+that you want to be executed for EVERY request. If pContinue is set to 0, the
+request will NOT be dispatched according to the UrlMap. If this case it's the
+responsibility of the user to return a response.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pUrl:%String,pMethod:%String,&pContinue:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set pContinue = $$$YES
+	/// maybe require only for OPTIONS
+	/// https://msdn.microsoft.com/en-us/library/aa142827(v=exchg.65).aspx
+	/// https://www.webdavsystem.com/server/documentation/ms_office_read_only/
+    do %response.SetHeader("DAV","1, 2")
+    q 1
+]]></Implementation>
+</Method>
+
 <Method name="PROPFIND">
 <Description>
 w ##class(WebDav.REST).PROPFIND()</Description>
@@ -87,7 +106,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	set isCollection = ..isCollection(href)
 	
 	set response = ##class(WebDav.XML.response).%New()
-	do response.href.Insert("http://localhost:57772/WebDAV" _ href)
+	do response.href.Insert(..getBase() _ href)
 	
 	set propstat = ##class(WebDav.XML.propstat).%New()
 	set propstat.status = "HTTP/1.1 200 OK"
@@ -108,6 +127,22 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	do response.propstat.Insert(propstat)
 	
 	return response
+]]></Implementation>
+</Method>
+
+<Method name="getBase">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	q "http://localhost:55555"
+]]></Implementation>
+</Method>
+
+<Method name="href2path">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>href</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[@..#FOLDER _ $p(href,"/",3,*)
 ]]></Implementation>
 </Method>
 
@@ -142,7 +177,24 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
 	s ^dbg2($i(^dbg2)) = $lb(href, @..#FOLDER _ href, $zt($p($h,",",2)))
-	q ..serve(@..#FOLDER _ $p(href,"/",3,*))
+	q ..serve(..href2path(href))
+]]></Implementation>
+</Method>
+
+<Method name="HEAD">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[
+	#dim %response As %CSP.Response
+	#dim %request As %CSP.Request
+	set %response.ContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+	set %response.ContentLength = 500
+	do %response.SetHeader("Accept-Ranges","bytes")
+	do %response.SetHeader("Last-Modified","Mon, 27 Mar 2017 11:03:16 GMT")
+	do %response.SetHeader("ETag","""a68375bce9a6d21:0""")
+	
+	s ^dbg4($i(^dbg4)) = $lb(href, $zt($p($h,",",2)))
+	q $$$OK
 ]]></Implementation>
 </Method>
 
@@ -155,7 +207,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	s ^dbg3($i(^dbg3)) = $lb(href, @..#FOLDER _ href, $zt($p($h,",",2)), %request.Content.Read($$$MaxLocalLength))
 	
 	set file = ##class(%Stream.FileBinary).%New()
-	do file.LinkToFile(@..#FOLDER _ $p(href,"/",3,*))
+	do file.LinkToFile(..href2path(href))
 	q file.CopyFromAndSave(%request.Content)
 ]]></Implementation>
 </Method>
@@ -182,7 +234,7 @@ w ##class(WebDav.REST).LOCK()</Description>
 	set active.owner.content = "ed-pc\eduard"
 	
 	set active.lockroot = ##class(WebDav.XML.lockroot).%New()
-	do active.lockroot.href.Insert( "http://localhost:57772/WebDAV" _ href)
+	do active.lockroot.href.Insert(..getBase() _ href)
 	
 	set active.locktoken = ##class(WebDav.XML.locktoken).%New()
 	do active.locktoken.href.Insert("opaquelocktoken:" _ $System.Util.CreateGUID())
