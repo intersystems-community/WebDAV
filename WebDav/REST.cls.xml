@@ -12,6 +12,10 @@
 <Default>text/xml</Default>
 </Parameter>
 
+<Parameter name="FOLDER">
+<Default>^WebDav.Settings("Folder")</Default>
+</Parameter>
+
 <XData name="UrlMap">
 <Data><![CDATA[
 <Routes>
@@ -42,34 +46,29 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
-	
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
-	set depth = 0
+	set depth = 1
 	if $isobject($g(%request))  {
 		set %response.Status = "207 Multi Status"
 		
-		set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)
-		
-			//set depth = 3
-			//write ..getClassXData(,"P" _ depth)   return 1
-				
+		set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)				
 	}
 	set isCollection = ..isCollection(href)
-	s ^dbg($i(^dbg)) = $lb(href, depth, isCollection, $zt($p($h,",",2)))
+	s ^dbg($i(^dbg)) = $lb(href, depth, isCollection, $zt($p($h,",",2)),@..#FOLDER)
 		
 	set multi = ##class(WebDav.XML.multistatus).%New()
+	do multi.response.Insert(..CreateResponse(href))
 	
-	if isCollection {
-	
-		do multi.response.Insert(..CreateResponse(2))
-	
-		if depth {
-			do multi.response.Insert(..CreateResponse("2/1.txt"))
-			do multi.response.Insert(..CreateResponse("2/2.txt"))
+	if isCollection,depth {		
+		#dim rs As %ResultSet = ##class(%File).FileSetFunc(@..#FOLDER)
+
+		while (rs.%Next()) {
+			set path = rs.Name		
+			set name = rs.ItemName
+			
+			do multi.response.Insert(..CreateResponse(href _ "/" _ name))
 		}
-	} else {
-		do multi.response.Insert(..CreateResponse("2/1.txt"))
 	}
 	
 	set w=##class(%XML.Writer).%New()
@@ -88,7 +87,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	set isCollection = ..isCollection(href)
 	
 	set response = ##class(WebDav.XML.response).%New()
-	do response.href.Insert("http://localhost:57772/WebDAV/" _ href)
+	do response.href.Insert("http://localhost:57772/WebDAV" _ href)
 	
 	set propstat = ##class(WebDav.XML.propstat).%New()
 	set propstat.status = "HTTP/1.1 200 OK"
@@ -139,7 +138,32 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <Method name="GET">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
-<Implementation><![CDATA[	q ..serve("C:\InterSystems\Cache\mgr\Temp\AN1POAIHgQGAxA.log")
+<Implementation><![CDATA[
+	s ^dbg2($i(^dbg2)) = $lb(href, @..#FOLDER _ href, $zt($p($h,",",2)))
+	q ..serve(@..#FOLDER _ $p(href,"/",3,*))
+]]></Implementation>
+</Method>
+
+<Method name="PUT">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[
+	#dim %response As %CSP.Response
+	#dim %request As %CSP.Request
+	s ^dbg3($i(^dbg3)) = $lb(href, @..#FOLDER _ href, $zt($p($h,",",2)), %request.Content.Read($$$MaxLocalLength))
+	
+	set file = ##class(%Stream.FileBinary).%New()
+	do file.LinkToFile(@..#FOLDER _ $p(href,"/",3,*))
+	q file.CopyFromAndSave(%request.Content)
+]]></Implementation>
+</Method>
+
+<Method name="LOCK">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[
+	w ..getClassXData(,"LOCK")
+	q 1
 ]]></Implementation>
 </Method>
 
@@ -449,6 +473,35 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 </propstat>
 </response>
 </multistatus>
+]]></Data>
+</XData>
+
+<XData name="LOCK">
+<Data><![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<prop xmlns:D="DAV:">
+<lockdiscovery>
+<activelock>
+<locktype>
+<write/>
+</locktype>
+<lockscope>
+<exclusive/>
+</lockscope>
+<depth>0</depth>
+<owner>
+<href>ed-pc\eduard</href>
+</owner>
+<timeout>Second-3600</timeout>
+<locktoken>
+<href>opaquelocktoken:0239528e-a130-4d24-bde2-4a421381356b.5b3201d2a6e4dd79</href>
+</locktoken>
+<lockroot>
+<href>http://localhost:57772/WebDAV/2/1.txt</href>
+</lockroot>
+</activelock>
+</lockdiscovery>
+</prop>
 ]]></Data>
 </XData>
 </Class>
