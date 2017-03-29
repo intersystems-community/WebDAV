@@ -45,7 +45,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
-	set depth = 1
+	set depth = 0
 	if $isobject($g(%request))  {
 		set %response.Status = "207 Multi Status"
 		
@@ -55,16 +55,21 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 			//write ..getClassXData(,"P" _ depth)   return 1
 				
 	}
-
-	
-	s ^dbg($i(^dbg)) = $lb(href, depth)
+	set isCollection = ..isCollection(href)
+	s ^dbg($i(^dbg)) = $lb(href, depth, isCollection, $zt($p($h,",",2)))
 		
 	set multi = ##class(WebDav.XML.multistatus).%New()
-	do multi.response.Insert(..CreateResponse(2, $$$YES))
 	
-	if depth {
-		do multi.response.Insert(..CreateResponse("2/1.txt", $$$NO))
-		do multi.response.Insert(..CreateResponse("2/2.txt", $$$NO))
+	if isCollection {
+	
+		do multi.response.Insert(..CreateResponse(2))
+	
+		if depth {
+			do multi.response.Insert(..CreateResponse("2/1.txt"))
+			do multi.response.Insert(..CreateResponse("2/2.txt"))
+		}
+	} else {
+		do multi.response.Insert(..CreateResponse("2/1.txt"))
 	}
 	
 	set w=##class(%XML.Writer).%New()
@@ -77,9 +82,11 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 
 <Method name="CreateResponse">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>href,isCollection</FormalSpec>
+<FormalSpec>href</FormalSpec>
 <ReturnType>WebDav.XML.response</ReturnType>
 <Implementation><![CDATA[
+	set isCollection = ..isCollection(href)
+	
 	set response = ##class(WebDav.XML.response).%New()
 	do response.href.Insert("http://localhost:57772/WebDAV/" _ href)
 	
@@ -103,13 +110,36 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="isCollection">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	return href '[ "."
+]]></Implementation>
+</Method>
+
+<Method name="serve">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim sc As %Status = $$$OK
+    #dim %response As %CSP.Response
+	kill %request.Data
+	set %request.Data("STREAMOID",1)= ##class(%CSP.StreamServer).Encrypt(##class(%CSP.StreamServer).GetOidForFile(name))
+	if ##class(%CSP.StreamServer).OnPreHTTP() {
+		set %response.Headers("Content-Disposition")="attachment; filename*=UTF-8''" _ ##class(%CSP.Page).EscapeURL("1.txt", "UTF8")
+		set sc = ##class(%CSP.StreamServer).OnPage()
+	}
+
+	quit sc
+]]></Implementation>
+</Method>
+
 <Method name="GET">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
-<Implementation><![CDATA[
-	w "<xml/>"
-	s ^dbg($i(^dbg)) = $g(href)
-	q 1
+<Implementation><![CDATA[	q ..serve("C:\InterSystems\Cache\mgr\Temp\AN1POAIHgQGAxA.log")
 ]]></Implementation>
 </Method>
 
