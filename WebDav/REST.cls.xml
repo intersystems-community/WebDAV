@@ -97,6 +97,8 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	set prop.displayname = $case(isCollection, 1: href, :##class(%File).GetFilename(href))
 	set prop.iscollection = isCollection
 	set prop.creationdate = prop.getlastmodified
+	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
+	set prop.supportedlock = ##class(WebDav.XML.supportedlock).%New()
 	
 	if isCollection {
 		set prop.resourcetype.collection = ##class(WebDav.XML.empty).%New()
@@ -159,11 +161,47 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 </Method>
 
 <Method name="LOCK">
+<Description>
+w ##class(WebDav.REST).LOCK()</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>href</FormalSpec>
+<FormalSpec>href="/2/1.txt"</FormalSpec>
 <Implementation><![CDATA[
-	w ..getClassXData(,"LOCK")
-	q 1
+	w ..getClassXData(,"LOCK2") q 1
+	
+	set prop = ##class(WebDav.XML.prop).%New()
+	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
+	
+	set active = ##class(WebDav.XML.activelock).%New()
+	set active.locktype = ##class(WebDav.XML.locktype).%New()
+	set active.lockscope = ##class(WebDav.XML.lockscope).%New()
+	set active.lockscope.exclusive = ##class(WebDav.XML.empty).%New()
+	set active.depth = 0
+	set active.timeout = "Second-3600"
+	
+	set active.owner = ##class(WebDav.XML.owner).%New()
+	set active.owner.content = "ed-pc\eduard"
+	
+	set active.lockroot = ##class(WebDav.XML.lockroot).%New()
+	set active.lockroot.href = "http://localhost:57772/WebDAV" _ href
+	
+	set active.locktoken = ##class(WebDav.XML.locktoken).%New()
+	set active.locktoken.href = "opaquelocktoken:" _ $System.Util.CreateGUID()
+	
+	//set exclusive = ##class(WebDav.XML.lockentry).%New()
+	//set exclusive.locktype.write = ##class(WebDav.XML.write).%New()
+
+	//set shared = ##class(WebDav.XML.lockentry).%New()
+	//set shared.lockscope.shared = ##class(WebDav.XML.empty).%New()
+	//set shared.locktype.write = ##class(WebDav.XML.write).%New()	
+
+	
+	do prop.lockdiscovery.activelock.Insert(active)
+	
+	set w=##class(%XML.Writer).%New()
+	set w.DefaultNamespace = "DAV:"
+ 	set w.Indent=1
+
+ 	return w.RootObject(prop)
 ]]></Implementation>
 </Method>
 
@@ -479,7 +517,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <XData name="LOCK">
 <Data><![CDATA[
 <?xml version="1.0" encoding="utf-8"?>
-<prop xmlns:D="DAV:">
+<prop xmlns="DAV:">
 <lockdiscovery>
 <activelock>
 <locktype>
@@ -501,6 +539,40 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 </lockroot>
 </activelock>
 </lockdiscovery>
+</prop>
+]]></Data>
+</XData>
+
+<XData name="LOCK2">
+<Data><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<prop xmlns="DAV:">
+<getcontenttype />
+<getlastmodified />
+<lockdiscovery>
+<activelock>
+<lockscope>
+<exclusive />
+</lockscope>
+<locktype>
+<write />
+</locktype>
+<depth>0</depth>
+<owner>ed-pc\eduard</owner>
+<timeout>Second-3600</timeout>
+<locktoken>
+</locktoken>
+<lockroot>
+<href>http://localhost:57772/WebDAV/2/1.txt</href>
+</lockroot>
+</activelock>
+</lockdiscovery>
+<ishidden>0</ishidden>
+<getetag />
+<displayname />
+<getcontentlanguage />
+<creationdate />
+<resourcetype />
 </prop>
 ]]></Data>
 </XData>

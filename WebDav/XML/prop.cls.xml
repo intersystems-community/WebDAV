@@ -37,7 +37,6 @@
 
 <Property name="lockdiscovery">
 <Type>WebDav.XML.lockdiscovery</Type>
-<InitialExpression>##class(WebDav.XML.lockdiscovery).%New()</InitialExpression>
 <Parameter name="XMLNAME" value="lockdiscovery"/>
 <Parameter name="XMLREF" value="1"/>
 </Property>
@@ -51,7 +50,6 @@
 
 <Property name="supportedlock">
 <Type>WebDav.XML.supportedlock</Type>
-<InitialExpression>##class(WebDav.XML.supportedlock).%New()</InitialExpression>
 <Parameter name="XMLNAME" value="supportedlock"/>
 <Parameter name="XMLREF" value="1"/>
 </Property>

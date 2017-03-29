@@ -59,5 +59,13 @@
 <Parameter name="XMLNAME" value="locktoken"/>
 <Parameter name="XMLREF" value="1"/>
 </Property>
+
+<Property name="lockroot">
+<Description>
+W10</Description>
+<Type>WebDav.XML.lockroot</Type>
+<Parameter name="XMLNAME" value="lockroot"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
 </Class>
 </Export>
