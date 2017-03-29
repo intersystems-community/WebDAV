@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.XML.lockroot">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>64370,42609.018502</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Default>lockroot</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="XMLIGNORENULL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="href">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="href"/>
+<Parameter name="XMLREF" value="1"/>
+</Property>
+</Class>
+</Export>
