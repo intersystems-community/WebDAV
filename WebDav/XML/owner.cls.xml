@@ -21,8 +21,8 @@
 
 <Property name="content">
 <Type>%XML.String</Type>
-<Parameter name="XMLNAME" value="content"/>
-<Parameter name="XMLPROJECTION" value="CONTENT"/>
+<Parameter name="XMLNAME" value="href"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
 </Property>
 </Class>
 </Export>

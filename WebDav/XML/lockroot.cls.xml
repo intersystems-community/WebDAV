@@ -8,7 +8,7 @@
 <TimeCreated>64370,42609.018502</TimeCreated>
 
 <Parameter name="XMLNAME">
-<Default>lockroot</Default>
+<Default>locktoken</Default>
 </Parameter>
 
 <Parameter name="XMLSEQUENCE">
@@ -21,9 +21,11 @@
 
 <Property name="href">
 <Type>%String</Type>
+<Collection>list</Collection>
 <Required>1</Required>
 <Parameter name="MAXLEN"/>
 <Parameter name="XMLNAME" value="href"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
 <Parameter name="XMLREF" value="1"/>
 </Property>
 </Class>

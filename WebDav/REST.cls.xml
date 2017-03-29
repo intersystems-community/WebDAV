@@ -166,7 +166,7 @@ w ##class(WebDav.REST).LOCK()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href="/2/1.txt"</FormalSpec>
 <Implementation><![CDATA[
-	w ..getClassXData(,"LOCK2") q 1
+	//w ..getClassXData(,"LOCK2") q 1
 	
 	set prop = ##class(WebDav.XML.prop).%New()
 	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
@@ -182,10 +182,10 @@ w ##class(WebDav.REST).LOCK()</Description>
 	set active.owner.content = "ed-pc\eduard"
 	
 	set active.lockroot = ##class(WebDav.XML.lockroot).%New()
-	set active.lockroot.href = "http://localhost:57772/WebDAV" _ href
+	do active.lockroot.href.Insert( "http://localhost:57772/WebDAV" _ href)
 	
 	set active.locktoken = ##class(WebDav.XML.locktoken).%New()
-	set active.locktoken.href = "opaquelocktoken:" _ $System.Util.CreateGUID()
+	do active.locktoken.href.Insert("opaquelocktoken:" _ $System.Util.CreateGUID())
 	
 	//set exclusive = ##class(WebDav.XML.lockentry).%New()
 	//set exclusive.locktype.write = ##class(WebDav.XML.write).%New()
@@ -547,8 +547,6 @@ w ##class(WebDav.REST).LOCK()</Description>
 <Data><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
 <prop xmlns="DAV:">
-<getcontenttype />
-<getlastmodified />
 <lockdiscovery>
 <activelock>
 <lockscope>
@@ -567,12 +565,6 @@ w ##class(WebDav.REST).LOCK()</Description>
 </lockroot>
 </activelock>
 </lockdiscovery>
-<ishidden>0</ishidden>
-<getetag />
-<displayname />
-<getcontentlanguage />
-<creationdate />
-<resourcetype />
 </prop>
 ]]></Data>
 </XData>
