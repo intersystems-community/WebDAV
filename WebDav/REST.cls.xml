@@ -138,7 +138,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	
 	set prop = ##class(WebDav.XML.prop).%New()
 	set prop.getlastmodified = "Mon, 27 Mar 2017 11:54:36 GMT" // $p($zdt($h,5), " ") _ ", " _ $zdt($h,2) _ " GMT"
-	set prop.displayname = $case(isCollection, 1: href, :##class(%File).GetFilename(href))
+	set prop.displayname = $case(isCollection, 1: $p(href, "/", *), :##class(%File).GetFilename(href))
 	set prop.iscollection = isCollection
 	set prop.creationdate = prop.getlastmodified
 	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
