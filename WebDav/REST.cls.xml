@@ -112,6 +112,8 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 		
 		set w=##class(%XML.Writer).%New()
 		set w.DefaultNamespace = "DAV:"
+		do w.AddNamespace("DAV:","D")
+	 	set w.ElementQualified = $$$NO
 	 	set w.Indent=1
 
 	 	set sc = w.RootObject(multi)
@@ -312,6 +314,8 @@ w ##class(WebDav.REST).LOCK()</Description>
 	
 	set w=##class(%XML.Writer).%New()
 	set w.DefaultNamespace = "DAV:"
+	do w.AddNamespace("DAV:","D")
+ 	set w.ElementQualified = $$$NO
  	set w.Indent=1
 
  	return w.RootObject(prop)
