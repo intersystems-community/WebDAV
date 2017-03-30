@@ -55,6 +55,9 @@ responsibility of the user to return a response.</Description>
 	/// https://msdn.microsoft.com/en-us/library/aa142827(v=exchg.65).aspx
 	/// https://www.webdavsystem.com/server/documentation/ms_office_read_only/
     do %response.SetHeader("DAV","1, 2")
+    
+    /// https://msdn.microsoft.com/en-us/library/cc250217.aspx
+    do %response.SetHeader("MS-Author-Via","DAV")
     q 1
 ]]></Implementation>
 </Method>
@@ -67,34 +70,41 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <Implementation><![CDATA[
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
-	set depth = 1
-	if $isobject($g(%request))  {
-		set %response.Status = "207 Multi Status"
-		
-		set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)				
-	}
-	set isCollection = ..isCollection(href)
-	s ^dbg($i(^dbg)) = $lb(href, depth, isCollection, $zt($p($h,",",2)),@..#FOLDER)
-		
-	set multi = ##class(WebDav.XML.multistatus).%New()
-	do multi.response.Insert(..CreateResponse(href))
 	
-	if isCollection,depth {		
-		#dim rs As %ResultSet = ##class(%File).FileSetFunc(@..#FOLDER)
-
-		while (rs.%Next()) {
-			set path = rs.Name		
-			set name = rs.ItemName
+	if ##class(%File).Exists(..href2path(href)) {	
+		set depth = 1
+		if $isobject($g(%request))  {
+			set %response.Status = "207 Multi Status"
 			
-			do multi.response.Insert(..CreateResponse(href _ "/" _ name))
+			set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)				
 		}
-	}
-	
-	set w=##class(%XML.Writer).%New()
-	set w.DefaultNamespace = "DAV:"
- 	set w.Indent=1
+		set isCollection = ..isCollection(href)
+		s ^dbg($i(^dbg)) = $lb(href, depth, isCollection, $zt($p($h,",",2)),@..#FOLDER)
+			
+		set multi = ##class(WebDav.XML.multistatus).%New()
+		do multi.response.Insert(..CreateResponse(href))
+		
+		if isCollection,depth {		
+			#dim rs As %ResultSet = ##class(%File).FileSetFunc(@..#FOLDER)
 
- 	return w.RootObject(multi)
+			while (rs.%Next()) {
+				set path = rs.Name		
+				set name = rs.ItemName
+				
+				do multi.response.Insert(..CreateResponse(href _ "/" _ name))
+			}
+		}
+		
+		set w=##class(%XML.Writer).%New()
+		set w.DefaultNamespace = "DAV:"
+	 	set w.Indent=1
+
+	 	set sc = w.RootObject(multi)
+	} else {
+		set %response.Status =  ..#HTTP404NOTFOUND
+		set sc =$$$OK
+	}
+	quit sc
 ]]></Implementation>
 </Method>
 
@@ -133,7 +143,10 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <Method name="getBase">
 <ClassMethod>1</ClassMethod>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[	q "http://localhost:55555"
+<Implementation><![CDATA[
+	#dim %response As %CSP.Response
+	#dim %request As %CSP.Request
+	q "htts://localhost"
 ]]></Implementation>
 </Method>
 
@@ -181,6 +194,31 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="PROPPATCH">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="UNLOCK">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DELETE">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[
+	set path = ..href2path(href)
+	set ^dbg.DELETE($i(^dbg.DELETE)) = $lb(href, path, $zt($p($h,",",2)))
+	do ##class(%File).Delete(path)
+	q $$$OK
+]]></Implementation>
+</Method>
+
 <Method name="HEAD">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
@@ -202,13 +240,21 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
+	#dim sc As %Status = $$$OK
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
-	s ^dbg3($i(^dbg3)) = $lb(href, @..#FOLDER _ href, $zt($p($h,",",2)), %request.Content.Read($$$MaxLocalLength))
-	
-	set file = ##class(%Stream.FileBinary).%New()
-	do file.LinkToFile(..href2path(href))
-	q file.CopyFromAndSave(%request.Content)
+	if $isobject(%request.Content) {
+		set ^dbg3($i(^dbg3)) = $lb(href, @..#FOLDER _ href, $zt($p($h,",",2)), %request.Content.Read($$$MaxLocalLength))
+		
+		set file = ##class(%Stream.FileBinary).%New()
+		do file.LinkToFile(..href2path(href))
+		set sc = file.CopyFromAndSave(%request.Content)
+	} else {
+		set file = ##class(%File).%New(..href2path(href))
+		do file.Open("WSN")
+		set sc = file.%Save()
+	}
+	quit sc
 ]]></Implementation>
 </Method>
 
