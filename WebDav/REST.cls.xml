@@ -4,6 +4,21 @@
 <Super>%CSP.REST</Super>
 <TimeCreated>64370,45626.334444</TimeCreated>
 
+<Parameter name="HTTP200OK">
+<Type>%String</Type>
+<Default>200 OK</Default>
+</Parameter>
+
+<Parameter name="HTTP207MULTISTATUS">
+<Type>%String</Type>
+<Default>207 Multi Status</Default>
+</Parameter>
+
+<Parameter name="HTTP404NOTFOUND">
+<Type>%String</Type>
+<Default>404 Not Found</Default>
+</Parameter>
+
 <Parameter name="HandleCorsRequest">
 <Default>1</Default>
 </Parameter>
@@ -74,7 +89,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	if ##class(%File).Exists(..href2path(href)) {	
 		set depth = 1
 		if $isobject($g(%request))  {
-			set %response.Status = "207 Multi Status"
+			set %response.Status = ..#HTTP207MULTISTATUS
 			
 			set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)				
 		}
@@ -119,7 +134,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	do response.href.Insert(..getBase() _ href)
 	
 	set propstat = ##class(WebDav.XML.propstat).%New()
-	set propstat.status = "HTTP/1.1 200 OK"
+	set propstat.status = "HTTP/1.1 " _ ..#HTTP200OK
 	
 	set prop = ##class(WebDav.XML.prop).%New()
 	set prop.getlastmodified = "Mon, 27 Mar 2017 11:54:36 GMT" // $p($zdt($h,5), " ") _ ", " _ $zdt($h,2) _ " GMT"
