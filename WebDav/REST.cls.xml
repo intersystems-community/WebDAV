@@ -218,10 +218,6 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
-	
-	set %response.ContentType = "html"
-	do ##class(%CSP.Utils).DisplayAllObjects()
-	return $$$OK
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
 	s ^dbg2($i(^dbg2)) = $lb(href, @..#FOLDER _ href, $zt($p($h,",",2)))
