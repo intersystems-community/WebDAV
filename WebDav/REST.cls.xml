@@ -35,21 +35,25 @@
 <Data><![CDATA[
 <Routes>
 
+   <!-- IMPLEMENTED -->
    <Route Url="(.*)" Method="PROPFIND" Call="PROPFIND"/>
-   
-   <!-- UNMIPLEMENTED -->
    <Route Url="(.*)" Method="GET" Call="GET"/>
-   <Route Url="(.*)" Method="HEAD" Call="HEAD"/>
-   <Route Url="(.*)" Method="POST" Call="POST"/>
    <Route Url="(.*)" Method="PUT" Call="PUT"/>
    <Route Url="(.*)" Method="DELETE" Call="DELETE"/>
-   <Route Url="(.*)" Method="TRACE" Call="TRACE"/>
-   <Route Url="(.*)" Method="COPY" Call="COPY"/>
    <Route Url="(.*)" Method="MOVE" Call="MOVE"/>
    <Route Url="(.*)" Method="MKCOL" Call="MKCOL"/>
+   
+   <!-- 200 OK -->
+   <Route Url="(.*)" Method="HEAD" Call="HEAD"/>
    <Route Url="(.*)" Method="PROPPATCH" Call="PROPPATCH"/>
    <Route Url="(.*)" Method="LOCK" Call="LOCK"/>
    <Route Url="(.*)" Method="UNLOCK" Call="UNLOCK"/>
+   
+   
+   <!-- UNIMPLEMENTED -->
+   <Route Url="(.*)" Method="POST" Call="POST"/>
+   <Route Url="(.*)" Method="TRACE" Call="TRACE"/>
+   <Route Url="(.*)" Method="COPY" Call="COPY"/>
    <Route Url="(.*)" Method="ORDERPATCH" Call="ORDERPATCH"/>
  </Routes>
 ]]></Data>
@@ -247,6 +251,35 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MKCOL">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[
+	set path = ..href2path(href)
+	do ##class(%File).CreateDirectoryChain(path)
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MOVE">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[
+	#dim %response As %CSP.Response
+	#dim %request As %CSP.Request
+	
+	set path = ..href2path(href)
+	
+	set dest = %request.GetCgiEnv("HTTP_DESTINATION")
+	set destHref = $p(dest, ..getBase(), 2, *)
+	set destPath =..href2path(destHref)
+	
+	set result = ##class(%File).Rename(path, destPath)
+	set ^dbg.MOVE($i(^dbg.MOVE)) = $lb(href, path, dest, destPath, result)
+	q $$$OK
 ]]></Implementation>
 </Method>
 
