@@ -196,10 +196,15 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 
 <Method name="href2path">
 <ClassMethod>1</ClassMethod>
-<CodeMode>expression</CodeMode>
 <FormalSpec>href</FormalSpec>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[@..#FOLDER _ $tr(href,"/","\")
+<Implementation><![CDATA[
+	if $$$isWINDOWS {
+		set path = @..#FOLDER _ $tr(href,"/","\")
+	} else {
+		set path = @..#FOLDER _ href
+	}
+	return path
 ]]></Implementation>
 </Method>
 
