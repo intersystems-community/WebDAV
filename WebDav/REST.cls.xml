@@ -305,8 +305,12 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <Implementation><![CDATA[
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
-	set %response.ContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-	set %response.ContentLength = 500
+	
+	set path = ..href2path(href)
+	do ##class(%CSP.StreamServer).FileClassify($p(path, ".", *), .type , .bin, .charset)
+	
+	set %response.ContentType = type  //"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+	set %response.ContentLength = ##class(%File).GetFileSize(href)
 	do %response.SetHeader("Accept-Ranges","bytes")
 	do %response.SetHeader("Last-Modified","Mon, 27 Mar 2017 11:03:16 GMT")
 	do %response.SetHeader("ETag","""a68375bce9a6d21:0""")
