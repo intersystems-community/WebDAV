@@ -71,9 +71,10 @@ responsibility of the user to return a response.</Description>
 	/// https://www.webdavsystem.com/server/documentation/ms_office_read_only/
     do %response.SetHeader("DAV","1, 2")
     
+    /// Helps MS Office on Windows, does not affect Mac office
     /// https://msdn.microsoft.com/en-us/library/cc250217.aspx
     do %response.SetHeader("MS-Author-Via","DAV")
-    q 1
+    quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -100,7 +101,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 		
 			
 		set multi = ##class(WebDav.XML.multistatus).%New()
-		do multi.response.Insert(..CreateResponse(href))
+		do multi.response.Insert(..createResponse(href))
 		
 		if isCollection,depth {		
 			#dim rs As %ResultSet = ##class(%File).FileSetFunc(path)
@@ -110,17 +111,12 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 				set name = rs.ItemName
 				set size =rs.Size
 				
-				do multi.response.Insert(..CreateResponse(href _ "/" _ name, size))
+				do multi.response.Insert(..createResponse(href _ "/" _ name, size))
 			}
 		}
 		
-		set w=##class(%XML.Writer).%New()
-		set w.DefaultNamespace = "DAV:"
-		do w.AddNamespace("DAV:","D")
-	 	set w.ElementQualified = $$$NO
-	 	set w.Indent=1
+		set sc = ..writeXML(multi)
 
-	 	set sc = w.RootObject(multi)
 	} else {
 		set %response.Status =  ..#HTTP404NOTFOUND
 		set sc =$$$OK
@@ -129,7 +125,22 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="CreateResponse">
+<Method name="writeXML">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>obj:%XML.Adaptor</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set w=##class(%XML.Writer).%New()
+	set w.DefaultNamespace = "DAV:"
+	do w.AddNamespace("DAV:","D")
+ 	set w.ElementQualified = $$$NO
+ 	set w.Indent=1
+
+ 	quit w.RootObject(obj)
+]]></Implementation>
+</Method>
+
+<Method name="createResponse">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href,size:%Integer=0</FormalSpec>
 <ReturnType>WebDav.XML.response</ReturnType>
@@ -326,13 +337,7 @@ w ##class(WebDav.REST).LOCK()</Description>
 	
 	do prop.lockdiscovery.activelock.Insert(active)
 	
-	set w=##class(%XML.Writer).%New()
-	set w.DefaultNamespace = "DAV:"
-	do w.AddNamespace("DAV:","D")
- 	set w.ElementQualified = $$$NO
- 	set w.Indent=1
-
- 	return w.RootObject(prop)
+	quit ..writeXML(multi)
 ]]></Implementation>
 </Method>
 </Class>
