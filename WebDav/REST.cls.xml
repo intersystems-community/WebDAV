@@ -375,7 +375,7 @@ w ##class(WebDav.REST).LOCK()</Description>
 	
 	do prop.lockdiscovery.activelock.Insert(active)
 	
-	quit ..writeXML(multi)
+	quit ..writeXML(prop)
 ]]></Implementation>
 </Method>
 </Class>
