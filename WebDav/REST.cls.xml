@@ -86,7 +86,10 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
 	
-	if ##class(%File).Exists(..href2path(href)) {	
+	set path = ..href2path(href)
+	//s ^dbg.PROPFIND($i(^dbg.PROPFIND)) = $lb(href, depth, isCollection, $zt($p($h,",",2)),@..#FOLDER)
+	
+	if ##class(%File).Exists(path) {	
 		set depth = 1
 		if $isobject($g(%request))  {
 			set %response.Status = ..#HTTP207MULTISTATUS
@@ -94,19 +97,20 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 			set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)				
 		}
 		set isCollection = ..isCollection(href)
-		s ^dbg($i(^dbg)) = $lb(href, depth, isCollection, $zt($p($h,",",2)),@..#FOLDER)
+		
 			
 		set multi = ##class(WebDav.XML.multistatus).%New()
 		do multi.response.Insert(..CreateResponse(href))
 		
 		if isCollection,depth {		
-			#dim rs As %ResultSet = ##class(%File).FileSetFunc(@..#FOLDER)
+			#dim rs As %ResultSet = ##class(%File).FileSetFunc(path)
 
 			while (rs.%Next()) {
 				set path = rs.Name		
 				set name = rs.ItemName
+				set size =rs.Size
 				
-				do multi.response.Insert(..CreateResponse(href _ "/" _ name))
+				do multi.response.Insert(..CreateResponse(href _ "/" _ name, size))
 			}
 		}
 		
@@ -127,7 +131,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 
 <Method name="CreateResponse">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>href</FormalSpec>
+<FormalSpec>href,size:%Integer=0</FormalSpec>
 <ReturnType>WebDav.XML.response</ReturnType>
 <Implementation><![CDATA[
 	set isCollection = ..isCollection(href)
@@ -145,6 +149,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	set prop.creationdate = prop.getlastmodified
 	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
 	set prop.supportedlock = ##class(WebDav.XML.supportedlock).%New()
+	set prop.getcontentlength = size
 	
 	if isCollection {
 		set prop.resourcetype.collection = ##class(WebDav.XML.empty).%New()
@@ -163,7 +168,14 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <Implementation><![CDATA[
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
-	q "htts://localhost"
+	
+	set https = $s(%request.IsDefinedCgiEnv("HTTPS"):%request.GetCgiEnv("HTTPS", $$$NO), 1:$$$NO)
+	set protocol = "http" _ $case(https, $$$YES: "s", :"") _"://"
+	set host = %request.GetCgiEnv("HTTP_HOST")
+	set app = %request.Application
+	set:app="/" app = "" 
+	
+	quit protocol _ host _ app
 ]]></Implementation>
 </Method>
 
@@ -172,7 +184,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <CodeMode>expression</CodeMode>
 <FormalSpec>href</FormalSpec>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[@..#FOLDER _ $p(href,"/",3,*)
+<Implementation><![CDATA[@..#FOLDER _ $tr(href,"/","\")
 ]]></Implementation>
 </Method>
 
@@ -206,6 +218,12 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
+	
+	set %response.ContentType = "html"
+	do ##class(%CSP.Utils).DisplayAllObjects()
+	return $$$OK
+	#dim %response As %CSP.Response
+	#dim %request As %CSP.Request
 	s ^dbg2($i(^dbg2)) = $lb(href, @..#FOLDER _ href, $zt($p($h,",",2)))
 	q ..serve(..href2path(href))
 ]]></Implementation>
