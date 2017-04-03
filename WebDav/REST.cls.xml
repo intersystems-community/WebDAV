@@ -229,9 +229,7 @@ Check if requested object is a directory or a file</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
-	/// TODO
-	return href '[ "."
+<Implementation><![CDATA[	return ##class(%File).DirectoryExists(..href2path(href))
 ]]></Implementation>
 </Method>
 
