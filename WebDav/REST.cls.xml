@@ -89,7 +89,7 @@ responsibility of the user to return a response.</Description>
 <Method name="PROPFIND">
 <Description>
 PROPFIND request is used to retrieve properties, stored as XML, from a web resource.
- It is also overloaded to allow one to retrieve the collection structure (a.k.a. directory hierarchy) of a remote system.
+It is also overloaded to allow one to retrieve the collection structure (a.k.a. directory hierarchy) of a remote system.
 w ##class(WebDav.REST).PROPFIND()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
@@ -119,8 +119,10 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 				set path = rs.Name		
 				set name = rs.ItemName
 				set size =rs.Size
+				set createdDate = rs.DateCreated
+				set modifiedDate = rs.DateModified
 				
-				do multi.response.Insert(..createResponse(href _ "/" _ name, size))
+				do multi.response.Insert(..createResponse(href _ "/" _ name, size, createdDate, modifiedDate))
 			}
 		}
 		
@@ -156,7 +158,7 @@ obj - is any xml-enabled object</Description>
 <Description>
 Create PROPFIND response for one file or directory.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>href,size:%Integer=0</FormalSpec>
+<FormalSpec>href,size:%Integer=0,createdDate="",modifiedDate=""</FormalSpec>
 <ReturnType>WebDav.XML.response</ReturnType>
 <Implementation><![CDATA[
 	set isCollection = ..isCollection(href)
@@ -168,15 +170,15 @@ Create PROPFIND response for one file or directory.</Description>
 	set propstat.status = "HTTP/1.1 " _ ..#HTTP200OK
 	
 	set prop = ##class(WebDav.XML.prop).%New()
-	/// TODO date
-	set prop.getlastmodified = "Mon, 27 Mar 2017 11:54:36 GMT" // $p($zdt($h,5), " ") _ ", " _ $zdt($h,2) _ " GMT"
+	set prop.getlastmodified = ..ts2httpDate(modifiedDate)
+	set prop.creationdate = ..ts2httpDate(createdDate)
 	set prop.displayname = $case(isCollection, 1: $p(href, "/", *), :##class(%File).GetFilename(href))
 	set prop.iscollection = isCollection
 	set prop.creationdate = prop.getlastmodified
 	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
 	set prop.supportedlock = ##class(WebDav.XML.supportedlock).%New()
 	set prop.getcontentlength = size
-	
+		
 	if isCollection {
 		set prop.resourcetype.collection = ##class(WebDav.XML.empty).%New()
 	}
@@ -185,6 +187,27 @@ Create PROPFIND response for one file or directory.</Description>
 	do response.propstat.Insert(propstat)
 	
 	return response
+]]></Implementation>
+</Method>
+
+<Method name="ts2httpDate">
+<Description>
+Converts timestamp into HTTP date as defined in section 3.3.1 of [RFC2068]
+https://tools.ietf.org/html/rfc2068#section-3.3.1
+RFC 822, updated by RFC 1123 (preferred):  wkday "," SP date SP time SP "GMT"
+Example: Sun, 06 Nov 1994 08:49:37 GMT
+w ##class(WebDav.REST).ts2httpDate("2017-03-31 15:17:59")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ts:%TimeStamp=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	quit:ts="" ""
+	set h = $zdth(ts, 3)
+	set h = $system.Util.LocalWithZTIMEZONEtoUTC(h)
+	set wkday = $zd(h, 11,,,,,,,, 1)
+	set date = $zd(h, 2,,,,,,,, 1)
+	set time = $zt($p(h,",",2),1)
+	quit wkday _ ", " _ date _ " " _ time _ " GMT"
 ]]></Implementation>
 </Method>
 
