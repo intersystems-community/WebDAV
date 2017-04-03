@@ -99,7 +99,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	
 	set path = ..href2path(href)
 	
-	if ##class(%File).Exists(path) {	
+	if ##class(%File).Exists(path) {
 		set depth = 1
 		if $isobject($g(%request))  {
 			set %response.Status = ..#HTTP207MULTISTATUS
