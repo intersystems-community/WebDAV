@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="WebDav.Utils.Sample">
+<Description>
+Sample WebDAV responses</Description>
 <TimeCreated>64373,51349.657972</TimeCreated>
 
 <Method name="getClassXData">
