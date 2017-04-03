@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="WebDav.REST">
+<Description>
+WebDAV Server Currently serves physical directory structure.</Description>
 <Super>%CSP.REST</Super>
 <TimeCreated>64370,45626.334444</TimeCreated>
 
@@ -28,6 +30,8 @@
 </Parameter>
 
 <Parameter name="FOLDER">
+<Description>
+Root folder for a WebDAV server. Should be set without trailing slash</Description>
 <Default>^WebDav.Settings("Folder")</Default>
 </Parameter>
 
@@ -84,6 +88,8 @@ responsibility of the user to return a response.</Description>
 
 <Method name="PROPFIND">
 <Description>
+PROPFIND request is used to retrieve properties, stored as XML, from a web resource.
+ It is also overloaded to allow one to retrieve the collection structure (a.k.a. directory hierarchy) of a remote system.
 w ##class(WebDav.REST).PROPFIND()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
@@ -92,7 +98,6 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	#dim %request As %CSP.Request
 	
 	set path = ..href2path(href)
-	//s ^dbg.PROPFIND($i(^dbg.PROPFIND)) = $lb(href, depth, isCollection, $zt($p($h,",",2)),@..#FOLDER)
 	
 	if ##class(%File).Exists(path) {	
 		set depth = 1
@@ -123,13 +128,16 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 
 	} else {
 		set %response.Status =  ..#HTTP404NOTFOUND
-		set sc =$$$OK
+		set sc = $$$OK
 	}
 	quit sc
 ]]></Implementation>
 </Method>
 
 <Method name="writeXML">
+<Description>
+Output XML in a mode compliant with WebDAV clients
+obj - is any xml-enabled object</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>obj:%XML.Adaptor</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -145,6 +153,8 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 </Method>
 
 <Method name="createResponse">
+<Description>
+Create PROPFIND response for one file or directory.</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href,size:%Integer=0</FormalSpec>
 <ReturnType>WebDav.XML.response</ReturnType>
@@ -158,6 +168,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	set propstat.status = "HTTP/1.1 " _ ..#HTTP200OK
 	
 	set prop = ##class(WebDav.XML.prop).%New()
+	/// TODO date
 	set prop.getlastmodified = "Mon, 27 Mar 2017 11:54:36 GMT" // $p($zdt($h,5), " ") _ ", " _ $zdt($h,2) _ " GMT"
 	set prop.displayname = $case(isCollection, 1: $p(href, "/", *), :##class(%File).GetFilename(href))
 	set prop.iscollection = isCollection
@@ -178,6 +189,8 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 </Method>
 
 <Method name="getBase">
+<Description>
+Get WebDAV server root URL</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
@@ -195,6 +208,8 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 </Method>
 
 <Method name="href2path">
+<Description>
+Convert request href into physical path</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <ReturnType>%String</ReturnType>
@@ -209,14 +224,20 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 </Method>
 
 <Method name="isCollection">
+<Description>
+Check if requested object is a directory or a file</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[	return href '[ "."
+<Implementation><![CDATA[
+	/// TODO
+	return href '[ "."
 ]]></Implementation>
 </Method>
 
 <Method name="serve">
+<Description>
+Return physical file  contents</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>name</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -226,7 +247,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	kill %request.Data
 	set %request.Data("STREAMOID",1)= ##class(%CSP.StreamServer).Encrypt(##class(%CSP.StreamServer).GetOidForFile(name))
 	if ##class(%CSP.StreamServer).OnPreHTTP() {
-		set %response.Headers("Content-Disposition")="attachment; filename*=UTF-8''" _ ##class(%CSP.Page).EscapeURL("1.txt", "UTF8")
+		set %response.Headers("Content-Disposition")="attachment; filename*=UTF-8''" _ ##class(%CSP.Page).EscapeURL(##class(%File).GetFilename(name), "UTF8")
 		set sc = ##class(%CSP.StreamServer).OnPage()
 	}
 
@@ -235,41 +256,50 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 </Method>
 
 <Method name="GET">
+<Description>
+Retrieve file contents</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
-	s ^dbg2($i(^dbg2)) = $lb(href, @..#FOLDER _ href, $zt($p($h,",",2)))
-	q ..serve(..href2path(href))
+	quit ..serve(..href2path(href))
 ]]></Implementation>
 </Method>
 
 <Method name="PROPPATCH">
+<Description>
+PROPPATCH is used to update object properties</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
-<Implementation><![CDATA[	q $$$OK
+<Implementation><![CDATA[	quit $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="UNLOCK">
+<Description>
+Reverse to LOCK, UNLOCK removes lock from an object </Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
-<Implementation><![CDATA[	q $$$OK
+<Implementation><![CDATA[	quit $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="MKCOL">
+<Description>
+MaKeCOLlection creates a directory</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
 	set path = ..href2path(href)
 	do ##class(%File).CreateDirectoryChain(path)
-	q $$$OK
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="MOVE">
+<Description>
+Moves object</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
@@ -283,23 +313,25 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	set destPath =..href2path(destHref)
 	
 	set result = ##class(%File).Rename(path, destPath)
-	set ^dbg.MOVE($i(^dbg.MOVE)) = $lb(href, path, dest, destPath, result)
-	q $$$OK
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="DELETE">
+<Description>
+Deletes object</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
 	set path = ..href2path(href)
-	set ^dbg.DELETE($i(^dbg.DELETE)) = $lb(href, path, $zt($p($h,",",2)))
 	do ##class(%File).Delete(path)
 	q $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="HEAD">
+<Description>
+Called befor GET to receive information about a file</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
@@ -309,27 +341,26 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	set path = ..href2path(href)
 	do ##class(%CSP.StreamServer).FileClassify($p(path, ".", *), .type , .bin, .charset)
 	
-	set %response.ContentType = type  //"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+	set %response.ContentType = type
 	set %response.ContentLength = ##class(%File).GetFileSize(href)
-	do %response.SetHeader("Accept-Ranges","bytes")
-	do %response.SetHeader("Last-Modified","Mon, 27 Mar 2017 11:03:16 GMT")
-	do %response.SetHeader("ETag","""a68375bce9a6d21:0""")
-	
-	s ^dbg4($i(^dbg4)) = $lb(href, $zt($p($h,",",2)))
-	q $$$OK
+	//do %response.SetHeader("Accept-Ranges","bytes")
+	//do %response.SetHeader("Last-Modified","Mon, 27 Mar 2017 11:03:16 GMT")
+	//do %response.SetHeader("ETag","""a68375bce9a6d21:0""")
+
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="PUT">
+<Description>
+Update file contents. Always completely rewrites the file </Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
 	#dim sc As %Status = $$$OK
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
-	if $isobject(%request.Content) {
-		set ^dbg3($i(^dbg3)) = $lb(href, @..#FOLDER _ href, $zt($p($h,",",2)), %request.Content.Read($$$MaxLocalLength))
-		
+	if $isobject(%request.Content) {		
 		set file = ##class(%Stream.FileBinary).%New()
 		do file.LinkToFile(..href2path(href))
 		set sc = file.CopyFromAndSave(%request.Content)
@@ -344,11 +375,11 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 
 <Method name="LOCK">
 <Description>
+Acquire a lock on a file
 w ##class(WebDav.REST).LOCK()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href="/2/1.txt"</FormalSpec>
 <Implementation><![CDATA[
-	//w ..getClassXData(,"LOCK2") q 1
 	
 	set prop = ##class(WebDav.XML.prop).%New()
 	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
