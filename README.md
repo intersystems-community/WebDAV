@@ -13,7 +13,7 @@ WebDAV implementation in InterSystems Caché
    
 # Linux file configuration
 
-Execute in a terminal:
+Set System call I/O table to UTF8. To do that, execute in a terminal:
 
 ```
 %SYS>d ^NLS
@@ -80,3 +80,11 @@ I/O table:
 
 1 changed property. Save? Yes => <Saved>
 ```
+
+# Linux firefox setup
+
+We need to register `dav` protocol with firefox. To do that:
+
+1. Type `about:config` into the Location Bar (address bar) and press Enter.
+2. Right-click -> New -> Boolean -> Name: `network.protocol-handler.expose.dav` -> Value -> false
+3. Next time you click a link of protocol-type foo you will be asked which application to open it with. Choose LibreOffice: `/usr/bin/loffice`
