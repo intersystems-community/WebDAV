@@ -88,3 +88,14 @@ We need to register `dav` protocol with firefox. To do that:
 1. Type `about:config` into the Location Bar (address bar) and press Enter.
 2. Right-click -> New -> Boolean -> Name: `network.protocol-handler.expose.dav` -> Value -> false
 3. Next time you click a link of protocol-type foo you will be asked which application to open it with. Choose LibreOffice: `/usr/bin/loffice`
+
+# Wireshark setup
+
+1. For local development [install](https://wiki.wireshark.org/CaptureSetup/Loopback) Wireshark with loopback support.
+2. Add capture filter: `port 57772`.
+3. Start capture.
+4. Add display filters:
+   - http
+   - http.user_agent contains "Microsoft"
+   - http.request.method == "POST"
+   - ip.dst == xxx.xxx.xxx.xxx && http
