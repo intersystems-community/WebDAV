@@ -13,7 +13,8 @@ WebDAV implementation in InterSystems Caché
    
 # Linux file configuration
 
-Set System call I/O table to UTF8. To do that, execute in a terminal:
+Test: `w ##class(%File).Exists("/path/to/файл.txt")` should return 0 if file does not exist and contains non-latin characters.
+If presence of non-latin character in a filename causes %File:Exists to always return 1, set System call I/O table to UTF8. To do that, execute in a terminal:
 
 ```
 %SYS>d ^NLS
@@ -99,3 +100,26 @@ We need to register `dav` protocol with firefox. To do that:
    - http.user_agent contains "Microsoft"
    - http.request.method == "POST"
    - ip.dst == xxx.xxx.xxx.xxx && http
+   
+# Compatibility
+
+Editors:
+
+| OS                    | Tool           | Status                         | Comments                   |
+|-----------------------|----------------|--------------------------------|----------------------------|
+| Windows 10            | Word 2013      | Online edit works              |                            |
+| Windows 10            | Word 2016      | Online edit works              |                            |
+| Windows 10            | Libreoffice 5  | Edit from explorer works       | Edit works with http links |
+| Windows 7             | Word 2003 SP 3 | Read-only                      |                            |
+| Linux (Lubuntu 16.10) | Libreoffice    | Online edit works              | Automounting?              |
+| Mac                   | Word 2016      | Read-only, kills file on write | Mac path errors?           |
+| Mac                   | Word 2011      | Errors                         |                            |
+
+File Browsers:
+
+| OS                    | Tool     | Status             | Comments |
+|-----------------------|----------|--------------------|----------|
+| Windows 10            | Explorer | Works              | #4       |
+| Windows 7             | Explorer | Works              | #4       |
+| Linux (Lubuntu 16.10) | PCManFM  | Works              |          |
+| Mac                   | Finder   | Works, Some errors | #5       |
