@@ -1,2 +1,3 @@
+<cspapp>
 WebDav.REST.cls
 WebDav.pkg
