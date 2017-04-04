@@ -26,7 +26,7 @@
 <Property name="getcontenttype">
 <Type>%String</Type>
 <Parameter name="XMLNAME" value="getcontenttype"/>
-<Parameter name="XMLREF" value="0"/>
+<Parameter name="XMLREF" value="1"/>
 </Property>
 
 <Property name="getlastmodified">
@@ -46,6 +46,7 @@
 0,1</Description>
 <Type>%Integer</Type>
 <InitialExpression>$$$NO</InitialExpression>
+<Parameter name="XMLREF" value="1"/>
 </Property>
 
 <Property name="supportedlock">
@@ -82,6 +83,7 @@
 <Description>
 0 - file , 1 - dir</Description>
 <Type>%Integer</Type>
+<Parameter name="XMLREF" value="1"/>
 </Property>
 
 <Property name="creationdate">
