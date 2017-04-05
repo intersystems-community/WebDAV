@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.Log">
+<Super>%Persistent</Super>
+<TimeCreated>64378,77608.870539</TimeCreated>
+
+<Property name="action">
+<Type>%String</Type>
+</Property>
+
+<Property name="href">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="path">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="comment">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="result">
+<Type>%Status</Type>
+</Property>
+
+<Method name="add">
+<Description>
+do ##class(WebDav.Log).%KillExtent()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>action,href,path,result="",comment=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set obj = ..%New(action, href,path, result, comment)
+	quit obj.%Save()
+]]></Implementation>
+</Method>
+
+<Method name="%OnNew">
+<FormalSpec>action,href,path,result="",comment=""</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	set ..action = action
+	set ..href = href
+	set ..path = path
+	set ..result = result
+	set ..comment = comment
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^WebDav.LogD</DataLocation>
+<DefaultData>LogDefaultData</DefaultData>
+<IdLocation>^WebDav.LogD</IdLocation>
+<IndexLocation>^WebDav.LogI</IndexLocation>
+<StreamLocation>^WebDav.LogS</StreamLocation>
+<Data name="LogDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>action</Value>
+</Value>
+<Value name="3">
+<Value>href</Value>
+</Value>
+<Value name="4">
+<Value>path</Value>
+</Value>
+<Value name="5">
+<Value>result</Value>
+</Value>
+<Value name="6">
+<Value>comment</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

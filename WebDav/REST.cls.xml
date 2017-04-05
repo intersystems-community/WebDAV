@@ -108,7 +108,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	#dim %request As %CSP.Request
 	
 	set path = ..href2path(href)
-	
+	do ##class(WebDav.Log).add("PROPFIND", href, path, ##class(%File).Exists(path))
 	if ##class(%File).Exists(path) {
 		set depth = 1
 		if $isobject($g(%request))  {
@@ -300,7 +300,10 @@ Retrieve file contents</Description>
 <Implementation><![CDATA[
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
-	quit ..serve(..href2path(href))
+	set path = ..href2path(href)
+	set sc = ..serve(path)
+	do ##class(WebDav.Log).add("GET", href, path, sc)
+	quit sc
 ]]></Implementation>
 </Method>
 
@@ -358,6 +361,7 @@ Moves object</Description>
 	}
 	
 	set result = ##class(%File).Rename(path, destPath)
+	do ##class(WebDav.Log).add("MOVE", href, path, result, destPath)
 	quit $$$OK
 ]]></Implementation>
 </Method>
@@ -375,6 +379,9 @@ Deletes object</Description>
 	} else {
 		set sc = ##class(%File).Delete(path)
 	}
+	
+	do ##class(WebDav.Log).add("DELETE", href, path, sc)
+	
 	quit $$$OK
 ]]></Implementation>
 </Method>
@@ -426,15 +433,17 @@ Update file contents. Always completely rewrites the file </Description>
 	#dim sc As %Status = $$$OK
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
+	set path = ..href2path(href)
 	if $isobject(%request.Content) {		
 		set file = ##class(%Stream.FileBinary).%New()
-		do file.LinkToFile(..href2path(href))
+		do file.LinkToFile(path)
 		set sc = file.CopyFromAndSave(%request.Content)
 	} else {
-		set file = ##class(%File).%New(..href2path(href))
+		set file = ##class(%File).%New(path)
 		do file.Open("WSN")
 		set sc = file.%Save()
 	}
+	do ##class(WebDav.Log).add("PUT", href, path, sc)
 	quit sc
 ]]></Implementation>
 </Method>
