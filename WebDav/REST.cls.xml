@@ -389,19 +389,31 @@ Called befor GET to receive information about a file</Description>
 	#dim %request As %CSP.Request
 	
 	set path = ..href2path(href)
-	set ext = $zcvt($p(path, ".", *),"U")
-	do ##class(%CSP.StreamServer).FileClassify(ext, .type , .bin, .charset)
-	if ext = "RTF" {
-		set type = "application/rtf"
-	} 
-	
-	set %response.ContentType = type
+
+	set %response.ContentType = ..getFileType(path)
 	set %response.ContentLength = ##class(%File).GetFileSize(href)
 	//do %response.SetHeader("Accept-Ranges","bytes")
 	//do %response.SetHeader("Last-Modified","Mon, 27 Mar 2017 11:03:16 GMT")
 	//do %response.SetHeader("ETag","""a68375bce9a6d21:0""")
 
 	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="getFileType">
+<Description>
+Determine file mime type</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>path</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set ext = "/" _ $zcvt($p(path, ".", *),"U") _ "/"
+	do ##class(%CSP.StreamServer).FileClassify(ext, .type , .bin, .charset)
+	if ext = "/RTF/" {
+		set type = "application/rtf"
+	}
+	
+	return type
 ]]></Implementation>
 </Method>
 
