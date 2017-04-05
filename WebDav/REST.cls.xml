@@ -349,6 +349,14 @@ Moves object</Description>
 	set destHref = $p(dest, ..getBase(), 2, *)
 	set destPath =..href2path(destHref)
 	
+	/// If a resource exists at the destination and the Overwrite header is "T", then prior to performing the move, 
+	/// the server MUST perform a DELETE with "Depth: infinity" on the destination resource. 
+	/// If the Overwrite header is set to "F", then the operation will fail.
+	/// No one sends that header
+	if ##class(%File).Exists(destPath),..securityCheck(destHref, "DELETE") {
+		do ..DELETE(destHref)
+	}
+	
 	set result = ##class(%File).Rename(path, destPath)
 	quit $$$OK
 ]]></Implementation>
