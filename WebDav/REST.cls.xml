@@ -349,6 +349,7 @@ Moves object</Description>
 	set path = ..href2path(href)
 	
 	set dest = %request.GetCgiEnv("HTTP_DESTINATION")
+	set dest = $zcvt($zcvt(dest, "I", "URL"), "I", "UTF8")
 	set destHref = $p(dest, ..getBase(), 2, *)
 	set destPath =..href2path(destHref)
 	
