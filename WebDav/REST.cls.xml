@@ -125,7 +125,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	#dim %request As %CSP.Request
 	
 	set path = ..href2path(href)
-	do ##class(WebDav.Log).add("PROPFIND", href, path, ##class(%File).Exists(path))
+	//do ##class(WebDav.Log).add("PROPFIND", href, path, ##class(%File).Exists(path))
 	if ##class(%File).Exists(path) {
 		set depth = 1
 		if $isobject($g(%request))  {
@@ -134,10 +134,10 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 			set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)				
 		}
 		set isCollection = ..isCollection(href)
-		
+		set size = $case(isCollection, $$$YES:0, :##class(%File).GetFileSize(path))
 			
 		set multi = ##class(WebDav.XML.multistatus).%New()
-		do multi.response.Insert(..createResponse(href))
+		do multi.response.Insert(..createResponse(href, size))
 		
 		if isCollection,depth {		
 			#dim rs As %ResultSet = ##class(%File).FileSetFunc(path)
@@ -250,7 +250,7 @@ Get WebDAV server root URL</Description>
 	#dim %request As %CSP.Request
 	if $isobject($g(%request)) {
 		set https = $s(%request.IsDefinedCgiEnv("HTTPS"):%request.GetCgiEnv("HTTPS", $$$NO), 1:$$$NO)
-		set protocol = "http" _ $case(https, $$$YES: "s", :"") _"://"
+		set protocol = "http" _ $case(https, $$$YES: "s", "on":"s", :"") _"://"
 		set host = %request.GetCgiEnv("HTTP_HOST")
 		set app = %request.Application
 		set:app="/" app = "" 
@@ -365,8 +365,7 @@ Moves object</Description>
 	
 	set path = ..href2path(href)
 	
-	set dest = %request.GetCgiEnv("HTTP_DESTINATION")
-	set dest = $zcvt($zcvt(dest, "I", "URL"), "I", "UTF8")
+	set dest = ..getHeader("DESTINATION")
 	set destHref = $p(dest, ..getBase(), 2, *)
 	set destPath =..href2path(destHref)
 	
@@ -384,13 +383,36 @@ Moves object</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="getHeader">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>header</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim %request As %CSP.Request
+	set value = ""
+	if $isobject($g(%request)) {
+		set header = "HTTP_" _ $zcvt(header, "U")
+		if %request.IsDefinedCgiEnv(header) {
+			set value = %request.GetCgiEnv(header)
+			set value = $zcvt($zcvt(value, "I", "URL"), "I", "UTF8")
+		}
+	}
+	return value
+]]></Implementation>
+</Method>
+
 <Method name="DELETE">
 <Description>
 Deletes object</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
+	set:href="" href = $p(..getHeader("DESTINATION"), ..getBase(), 2, *)
 	set path = ..href2path(href)
+	if ((href="")||(href="/")) {
+		do ##class(WebDav.Log).add("DELETE", href, path, $$$NO)
+		return $$$OK
+	}
 	
 	if ..isCollection(href) {
 		set sc = ##class(%File).RemoveDirectoryTree(path)
