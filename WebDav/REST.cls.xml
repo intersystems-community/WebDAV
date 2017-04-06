@@ -86,6 +86,23 @@ responsibility of the user to return a response.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="OnHandleOptionsRequest">
+<Description>
+This methods provides handling of the options request.
+Note carefully: If authentication is required then this method will be
+called before login and as such will have only limited privileges</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pUrl:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    do %response.SetHeader("DAV","1, 2")
+    do %response.SetHeader("MS-Author-Via","DAV")
+    
+    #; Simply dispatch to the default implementation
+    Quit ..HandleDefaultOptionsRequest(pUrl)
+]]></Implementation>
+</Method>
+
 <Method name="securityCheck">
 <Description>
 Chech if client is allowed to make this request</Description>
