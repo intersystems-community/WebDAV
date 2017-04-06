@@ -27,6 +27,11 @@
 <Type>%Status</Type>
 </Property>
 
+<Property name="ts">
+<Type>%TimeStamp</Type>
+<InitialExpression>$zdt($h, 3, 1,3)</InitialExpression>
+</Property>
+
 <Method name="add">
 <Description>
 do ##class(WebDav.Log).%KillExtent()</Description>
