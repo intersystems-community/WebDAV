@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.Log.Request">
+<Description>
+Incoming request</Description>
+<Super>%Persistent</Super>
+<TimeCreated>64383,42587.123429</TimeCreated>
+
+<Property name="method">
+<Description>
+A string indicating HTTP method used for this request.</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="url">
+<Description>
+A string containing the URL up to and including the page name 
+and extension, but not including the query string.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="userAgent">
+<Description>
+A string indicating the type of browser from which the request 
+originated, as determined from the HTTP_USER_AGENT header.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="contentType">
+<Description>
+A string indicating the MIME Content-Type of the request.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="charSet">
+<Description>
+Character set this request was send in, if not specified in the HTTP headers
+it defaults to the character set of the page it is being submitted to.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="content">
+<Description><![CDATA[
+A <class>%CSP.Stream</class> containing the content submitted
+with this request.]]></Description>
+<Type>%Stream.GlobalBinary</Type>
+</Property>
+
+<Property name="secure">
+<Description>
+True if the communication between the browser and the web server was using
+the secure https protocol. False for a normal http connection.</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="cgiEnvs">
+<Type>%String</Type>
+<Collection>array</Collection>
+<Parameter name="MAXLEN"/>
+<Parameter name="SQLPROJECTION" value="table/column"/>
+</Property>
+
+<Method name="%OnNew">
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	#dim %request As %CSP.Request
+	#dim sc As %Status = $$$OK
+	
+	quit:'$isObject($g(%request)) $$$ERROR($$$GeneralError, "Not a web context")
+	
+	set ..charSet =%request.CharSet
+	if $isObject(%request.Content) {
+		do ..content.CopyFromAndSave(%request.Content)
+	} else {
+		set ..content = ""
+	}
+	set ..contentType = %request.ContentType
+	set ..method = %request.Method
+	set ..secure = %request.Secure
+	set ..url = %request.URL
+	set ..userAgent = %request.UserAgent
+	
+	set cgi = ""
+	for {
+		set cgi=$order(%request.CgiEnvs(cgi)) 
+		quit:cgi=""
+		do ..cgiEnvs.SetAt(%request.CgiEnvs(cgi), cgi)
+	}	
+	
+	quit sc
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^WebDav.Log.RequestD</DataLocation>
+<DefaultData>RequestDefaultData</DefaultData>
+<IdLocation>^WebDav.Log.RequestD</IdLocation>
+<IndexLocation>^WebDav.Log.RequestI</IndexLocation>
+<StreamLocation>^WebDav.Log.RequestS</StreamLocation>
+<Data name="RequestDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>url</Value>
+</Value>
+<Value name="3">
+<Value>userAgent</Value>
+</Value>
+<Value name="4">
+<Value>contentType</Value>
+</Value>
+<Value name="5">
+<Value>charSet</Value>
+</Value>
+<Value name="6">
+<Value>content</Value>
+</Value>
+<Value name="7">
+<Value>secure</Value>
+</Value>
+<Value name="8">
+<Value>method</Value>
+</Value>
+</Data>
+<Data name="cgiEnvs">
+<Attribute>cgiEnvs</Attribute>
+<Structure>subnode</Structure>
+<Subscript>"cgiEnvs"</Subscript>
+</Data>
+</Storage>
+</Class>
+</Export>

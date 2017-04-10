@@ -4,7 +4,7 @@
 <Super>%Persistent</Super>
 <TimeCreated>64378,77608.870539</TimeCreated>
 
-<Property name="action">
+<Property name="method">
 <Type>%String</Type>
 </Property>
 
@@ -32,29 +32,35 @@
 <InitialExpression>$zdt($h, 3, 1,3)</InitialExpression>
 </Property>
 
+<Property name="request">
+<Type>WebDav.Log.Request</Type>
+</Property>
+
 <Method name="add">
 <Description>
 do ##class(WebDav.Log).%KillExtent()</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>action,href,path,result="",comment=""</FormalSpec>
+<FormalSpec>method,href,path,result="",comment=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	set obj = ..%New(action, href,path, result, comment)
-	quit obj.%Save()
+	set obj = ..%New(method, href, path, result, comment)
+	set sc = obj.%Save()
+	quit sc
 ]]></Implementation>
 </Method>
 
 <Method name="%OnNew">
-<FormalSpec>action,href,path,result="",comment=""</FormalSpec>
+<FormalSpec>method,href,path,result="",comment=""</FormalSpec>
 <Private>1</Private>
 <ReturnType>%Status</ReturnType>
 <ServerOnly>1</ServerOnly>
 <Implementation><![CDATA[
-	set ..action = action
+	set ..method = method
 	set ..href = href
 	set ..path = path
 	set ..result = result
 	set ..comment = comment
+	set ..request = ##class(WebDav.Log.Request).%New()
 	quit $$$OK
 ]]></Implementation>
 </Method>
@@ -71,7 +77,7 @@ do ##class(WebDav.Log).%KillExtent()</Description>
 <Value>%%CLASSNAME</Value>
 </Value>
 <Value name="2">
-<Value>action</Value>
+<Value>method</Value>
 </Value>
 <Value name="3">
 <Value>href</Value>
@@ -84,6 +90,12 @@ do ##class(WebDav.Log).%KillExtent()</Description>
 </Value>
 <Value name="6">
 <Value>comment</Value>
+</Value>
+<Value name="7">
+<Value>ts</Value>
+</Value>
+<Value name="8">
+<Value>request</Value>
 </Value>
 </Data>
 </Storage>
