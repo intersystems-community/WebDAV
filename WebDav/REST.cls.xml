@@ -348,7 +348,8 @@ MaKeCOLlection creates a directory</Description>
 <FormalSpec>href</FormalSpec>
 <Implementation><![CDATA[
 	set path = ..href2path(href)
-	do ##class(%File).CreateDirectoryChain(path)
+	set result = ##class(%File).CreateDirectoryChain(path, .return)
+	do ##class(WebDav.Log).add("MKCOL", href, path, result, return)
 	quit $$$OK
 ]]></Implementation>
 </Method>
