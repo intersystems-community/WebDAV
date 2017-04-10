@@ -249,8 +249,7 @@ Get WebDAV server root URL</Description>
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
 	if $isobject($g(%request)) {
-		set https = $s(%request.IsDefinedCgiEnv("HTTPS"):%request.GetCgiEnv("HTTPS", $$$NO), 1:$$$NO)
-		set protocol = "http" _ $case(https, $$$YES: "s", "on":"s", :"") _"://"
+		set protocol = "http" _ $case(%request.Secure, $$$YES: "s", :"") _"://"
 		set host = %request.GetCgiEnv("HTTP_HOST")
 		set app = %request.Application
 		set:app="/" app = "" 
