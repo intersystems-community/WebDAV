@@ -64,6 +64,13 @@ the secure https protocol. False for a normal http connection.</Description>
 <Parameter name="SQLPROJECTION" value="table/column"/>
 </Property>
 
+<Property name="data">
+<Type>%String</Type>
+<Collection>array</Collection>
+<Parameter name="MAXLEN"/>
+<Parameter name="SQLPROJECTION" value="table/column"/>
+</Property>
+
 <Method name="%OnNew">
 <Private>1</Private>
 <ReturnType>%Status</ReturnType>
@@ -91,7 +98,14 @@ the secure https protocol. False for a normal http connection.</Description>
 		set cgi=$order(%request.CgiEnvs(cgi)) 
 		quit:cgi=""
 		do ..cgiEnvs.SetAt(%request.CgiEnvs(cgi), cgi)
-	}	
+	}
+	
+	set data = ""
+	for {
+		set data=$order(%request.Data(data)) 
+		quit:data=""
+		do ..data.SetAt(%request.Get(data), data)
+	}		
 	
 	quit sc
 ]]></Implementation>
@@ -134,6 +148,11 @@ the secure https protocol. False for a normal http connection.</Description>
 <Attribute>cgiEnvs</Attribute>
 <Structure>subnode</Structure>
 <Subscript>"cgiEnvs"</Subscript>
+</Data>
+<Data name="data">
+<Attribute>data</Attribute>
+<Structure>subnode</Structure>
+<Subscript>"data"</Subscript>
 </Data>
 </Storage>
 </Class>
