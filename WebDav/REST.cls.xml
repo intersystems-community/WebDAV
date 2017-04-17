@@ -3,32 +3,8 @@
 <Class name="WebDav.REST">
 <Description>
 WebDAV Server Currently serves physical directory structure.</Description>
-<Super>%CSP.REST,WebDav.Utils.XML</Super>
+<Super>WebDav.AbstractREST,WebDav.Utils.XML</Super>
 <TimeCreated>64370,45626.334444</TimeCreated>
-
-<Parameter name="HTTP207MULTISTATUS">
-<Type>%String</Type>
-<Default>207 Multi Status</Default>
-</Parameter>
-
-<Parameter name="HTTP404NOTFOUND">
-<Type>%String</Type>
-<Default>404 Not Found</Default>
-</Parameter>
-
-<Parameter name="HandleCorsRequest">
-<Default>1</Default>
-</Parameter>
-
-<Parameter name="CONTENTTYPE">
-<Default>text/xml</Default>
-</Parameter>
-
-<Parameter name="FOLDER">
-<Description>
-Root folder for a WebDAV server. Should be set without trailing slash</Description>
-<Default>^WebDav.Settings("Folder")</Default>
-</Parameter>
 
 <XData name="UrlMap">
 <Data><![CDATA[
@@ -56,56 +32,6 @@ Root folder for a WebDAV server. Should be set without trailing slash</Descripti
  </Routes>
 ]]></Data>
 </XData>
-
-<Method name="OnPreDispatch">
-<Description>
-This method Gets called prior to dispatch of the request. Put any common code here
-that you want to be executed for EVERY request. If pContinue is set to 0, the
-request will NOT be dispatched according to the UrlMap. If this case it's the
-responsibility of the user to return a response.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[pUrl:%String,pMethod:%String,&pContinue:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	set pContinue = ..securityCheck(pUrl, pMethod)
-	/// maybe require only for OPTIONS
-	/// https://msdn.microsoft.com/en-us/library/aa142827(v=exchg.65).aspx
-	/// https://www.webdavsystem.com/server/documentation/ms_office_read_only/
-    do %response.SetHeader("DAV","1, 2")
-    
-    /// Helps MS Office on Windows, does not affect Mac office
-    /// https://msdn.microsoft.com/en-us/library/cc250217.aspx
-    do %response.SetHeader("MS-Author-Via","DAV")
-    quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="OnHandleOptionsRequest">
-<Description>
-This methods provides handling of the options request.
-Note carefully: If authentication is required then this method will be
-called before login and as such will have only limited privileges</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>pUrl:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-    do %response.SetHeader("DAV","1, 2")
-    do %response.SetHeader("MS-Author-Via","DAV")
-    
-    #; Simply dispatch to the default implementation
-    Quit ..HandleDefaultOptionsRequest(pUrl)
-]]></Implementation>
-</Method>
-
-<Method name="securityCheck">
-<Description>
-Chech if client is allowed to make this request</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>pUrl:%String,pMethod:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[	quit $$$YES
-]]></Implementation>
-</Method>
 
 <Method name="href2path">
 <Description>
@@ -140,6 +66,7 @@ It is also overloaded to allow one to retrieve the collection structure (a.k.a. 
 w ##class(WebDav.REST).PROPFIND()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
@@ -147,12 +74,14 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	set path = ..href2path(href)
 	//do ##class(WebDav.Log).add("PROPFIND", href, path, ##class(%File).Exists(path))
 	if ##class(%File).Exists(path) {
-		set depth = 1
+		
 		if $isobject($g(%request)) {
 			set %response.Status = ..#HTTP207MULTISTATUS
-			
 			set depth = ..getHeader("DEPTH", 0)				
+		} else {
+			set depth = 1
 		}
+		
 		set isCollection = ..isCollection(href)
 		set size = $case(isCollection, $$$YES:0, :##class(%File).GetFileSize(path))
 			
@@ -190,6 +119,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 Retrieve file contents</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
@@ -205,6 +135,7 @@ Retrieve file contents</Description>
 PROPPATCH is used to update object properties</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	quit $$$OK
 ]]></Implementation>
 </Method>
@@ -214,6 +145,7 @@ PROPPATCH is used to update object properties</Description>
 Reverse to LOCK, UNLOCK removes lock from an object </Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	quit $$$OK
 ]]></Implementation>
 </Method>
@@ -236,7 +168,9 @@ MaKeCOLlection creates a directory</Description>
 Moves object</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	#dim sc As %Status = $$$OK
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
 	
@@ -253,10 +187,11 @@ Moves object</Description>
 	if ##class(%File).Exists(destPath),..securityCheck(destHref, "DELETE") {
 		do ..DELETE(destHref)
 	}
-	
-	set result = ##class(%File).Rename(path, destPath)
-	do ##class(WebDav.Log).add(path, result, destPath)
-	quit $$$OK
+
+	set result = ##class(%File).Rename(path, destPath, .return)
+	set:result=$$$NO sc = $$$ERROR($$$GeneralError, $$$FormatText("Renaiming file %0 into %1 failed, reason: %2", path, destPath, return))
+	do ##class(WebDav.Log).add(path, sc, destPath)
+	quit sc
 ]]></Implementation>
 </Method>
 
@@ -265,6 +200,7 @@ Moves object</Description>
 Deletes object</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	set:href="" href = $p(..getHeader("DESTINATION"), ..getBase(), 2, *)
 	set path = ..href2path(href)
@@ -281,15 +217,16 @@ Deletes object</Description>
 	
 	do ##class(WebDav.Log).add(path, sc)
 	
-	quit $$$OK
+	quit sc
 ]]></Implementation>
 </Method>
 
 <Method name="HEAD">
 <Description>
-Called befor GET to receive information about a file</Description>
+Called before GET to receive information about a file</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
@@ -322,6 +259,7 @@ Update file contents. Always completely rewrites the file </Description>
 		do file.LinkToFile(path)
 		set sc = file.CopyFromAndSave(%request.Content)
 	} else {
+		// Create empty file
 		set file = ##class(%File).%New(path)
 		do file.Open("WSN")
 		set sc = file.%Save()
