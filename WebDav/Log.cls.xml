@@ -4,35 +4,36 @@
 <Super>%Persistent</Super>
 <TimeCreated>64378,77608.870539</TimeCreated>
 
-<Property name="method">
-<Type>%String</Type>
-</Property>
-
-<Property name="href">
-<Type>%String</Type>
-<Parameter name="MAXLEN"/>
-</Property>
-
 <Property name="path">
+<Description>
+Resolved reference to Caché object</Description>
 <Type>%String</Type>
 <Parameter name="MAXLEN"/>
 </Property>
 
 <Property name="comment">
+<Description>
+Any comment</Description>
 <Type>%String</Type>
 <Parameter name="MAXLEN"/>
 </Property>
 
 <Property name="result">
+<Description>
+Result of operation on an object</Description>
 <Type>%Status</Type>
 </Property>
 
 <Property name="ts">
+<Description>
+Timestamp of log entry</Description>
 <Type>%TimeStamp</Type>
 <InitialExpression>$zdt($h, 3, 1,3)</InitialExpression>
 </Property>
 
 <Property name="request">
+<Description>
+Persistent request</Description>
 <Type>WebDav.Log.Request</Type>
 </Property>
 
@@ -40,23 +41,21 @@
 <Description>
 do ##class(WebDav.Log).%KillExtent()</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>method,href,path,result="",comment=""</FormalSpec>
+<FormalSpec>path,result="",comment=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	set obj = ..%New(method, href, path, result, comment)
+	set obj = ..%New(path, result, comment)
 	set sc = obj.%Save()
 	quit sc
 ]]></Implementation>
 </Method>
 
 <Method name="%OnNew">
-<FormalSpec>method,href,path,result="",comment=""</FormalSpec>
+<FormalSpec>path="",result="",comment=""</FormalSpec>
 <Private>1</Private>
 <ReturnType>%Status</ReturnType>
 <ServerOnly>1</ServerOnly>
 <Implementation><![CDATA[
-	set ..method = method
-	set ..href = href
 	set ..path = path
 	set ..result = result
 	set ..comment = comment
