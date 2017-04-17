@@ -3,7 +3,7 @@
 <Class name="WebDav.REST">
 <Description>
 WebDAV Server Currently serves physical directory structure.</Description>
-<Super>%CSP.REST</Super>
+<Super>%CSP.REST,WebDav.Utils.HTTP</Super>
 <TimeCreated>64370,45626.334444</TimeCreated>
 
 <Parameter name="HTTP200OK">
@@ -38,7 +38,6 @@ Root folder for a WebDAV server. Should be set without trailing slash</Descripti
 <XData name="UrlMap">
 <Data><![CDATA[
 <Routes>
-
    <!-- IMPLEMENTED -->
    <Route Url="(.*)" Method="PROPFIND" Call="PROPFIND"/>
    <Route Url="(.*)" Method="GET" Call="GET"/>
@@ -128,7 +127,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 	//do ##class(WebDav.Log).add("PROPFIND", href, path, ##class(%File).Exists(path))
 	if ##class(%File).Exists(path) {
 		set depth = 1
-		if $isobject($g(%request))  {
+		if $isobject($g(%request)) {
 			set %response.Status = ..#HTTP207MULTISTATUS
 			
 			set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)				
@@ -219,49 +218,6 @@ Create PROPFIND response for one file or directory.</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="ts2httpDate">
-<Description>
-Converts timestamp into HTTP date as defined in section 3.3.1 of [RFC2068]
-https://tools.ietf.org/html/rfc2068#section-3.3.1
-RFC 822, updated by RFC 1123 (preferred):  wkday "," SP date SP time SP "GMT"
-Example: Sun, 06 Nov 1994 08:49:37 GMT
-w ##class(WebDav.REST).ts2httpDate("2017-03-31 15:17:59")</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ts:%TimeStamp=""</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	quit:ts="" ""
-	set h = $zdth(ts, 3)
-	set h = $system.Util.LocalWithZTIMEZONEtoUTC(h)
-	set wkday = $zd(h, 11,,,,,,,, 1)
-	set date = $zd(h, 2,,,,,,,, 1)
-	set time = $zt($p(h,",",2),1)
-	quit wkday _ ", " _ date _ " " _ time _ " GMT"
-]]></Implementation>
-</Method>
-
-<Method name="getBase">
-<Description>
-Get WebDAV server root URL</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	#dim %response As %CSP.Response
-	#dim %request As %CSP.Request
-	if $isobject($g(%request)) {
-		set protocol = "http" _ $case(%request.Secure, $$$YES: "s", :"") _"://"
-		set host = %request.GetCgiEnv("HTTP_HOST")
-		set app = %request.Application
-		set:app="/" app = "" 
-	} else {
-		set protocol = "http"
-		set host = "localhost:57772"
-		set app = ""
-	}	
-	quit protocol _ host //_ app
-]]></Implementation>
-</Method>
-
 <Method name="href2path">
 <Description>
 Convert request href into physical path</Description>
@@ -288,26 +244,6 @@ Check if requested object is a directory or a file</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="serve">
-<Description>
-Return physical file  contents</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>name</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	#dim sc As %Status = $$$OK
-    #dim %response As %CSP.Response
-	//kill %request.Data
-	set %request.Data("STREAMOID",1)= ##class(%CSP.StreamServer).Encrypt(##class(%CSP.StreamServer).GetOidForFile(name))
-	if ##class(%CSP.StreamServer).OnPreHTTP() {
-		set %response.Headers("Content-Disposition")="attachment; filename*=UTF-8''" _ ##class(%CSP.Page).EscapeURL(##class(%File).GetFilename(name), "UTF8")
-		set sc = ##class(%CSP.StreamServer).OnPage()
-	}
-
-	quit sc
-]]></Implementation>
-</Method>
-
 <Method name="GET">
 <Description>
 Retrieve file contents</Description>
@@ -318,7 +254,7 @@ Retrieve file contents</Description>
 	#dim %request As %CSP.Request
 	set path = ..href2path(href)
 	set sc = ..serve(path)
-	do ##class(WebDav.Log).add("GET", href, path, sc)
+	do ##class(WebDav.Log).add(path, sc)
 	quit sc
 ]]></Implementation>
 </Method>
@@ -349,7 +285,7 @@ MaKeCOLlection creates a directory</Description>
 <Implementation><![CDATA[
 	set path = ..href2path(href)
 	set result = ##class(%File).CreateDirectoryChain(path, .return)
-	do ##class(WebDav.Log).add("MKCOL", href, path, result, return)
+	do ##class(WebDav.Log).add(path, result, return)
 	quit $$$OK
 ]]></Implementation>
 </Method>
@@ -378,26 +314,8 @@ Moves object</Description>
 	}
 	
 	set result = ##class(%File).Rename(path, destPath)
-	do ##class(WebDav.Log).add("MOVE", href, path, result, destPath)
+	do ##class(WebDav.Log).add(path, result, destPath)
 	quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="getHeader">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>header</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	#dim %request As %CSP.Request
-	set value = ""
-	if $isobject($g(%request)) {
-		set header = "HTTP_" _ $zcvt(header, "U")
-		if %request.IsDefinedCgiEnv(header) {
-			set value = %request.GetCgiEnv(header)
-			set value = $zcvt($zcvt(value, "I", "URL"), "I", "UTF8")
-		}
-	}
-	return value
 ]]></Implementation>
 </Method>
 
@@ -410,7 +328,7 @@ Deletes object</Description>
 	set:href="" href = $p(..getHeader("DESTINATION"), ..getBase(), 2, *)
 	set path = ..href2path(href)
 	if ((href="")||(href="/")) {
-		do ##class(WebDav.Log).add("DELETE", href, path, $$$NO)
+		do ##class(WebDav.Log).add(path, $$$NO)
 		return $$$OK
 	}
 	
@@ -420,7 +338,7 @@ Deletes object</Description>
 		set sc = ##class(%File).Delete(path)
 	}
 	
-	do ##class(WebDav.Log).add("DELETE", href, path, sc)
+	do ##class(WebDav.Log).add(path, sc)
 	
 	quit $$$OK
 ]]></Implementation>
@@ -447,23 +365,6 @@ Called befor GET to receive information about a file</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="getFileType">
-<Description>
-Determine file mime type</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>path</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	set ext = "/" _ $zcvt($p(path, ".", *),"U") _ "/"
-	do ##class(%CSP.StreamServer).FileClassify(ext, .type , .bin, .charset)
-	if ext = "/RTF/" {
-		set type = "application/rtf"
-	}
-	
-	return type
-]]></Implementation>
-</Method>
-
 <Method name="PUT">
 <Description>
 Update file contents. Always completely rewrites the file </Description>
@@ -483,7 +384,7 @@ Update file contents. Always completely rewrites the file </Description>
 		do file.Open("WSN")
 		set sc = file.%Save()
 	}
-	do ##class(WebDav.Log).add("PUT", href, path, sc)
+	do ##class(WebDav.Log).add(path, sc)
 	quit sc
 ]]></Implementation>
 </Method>

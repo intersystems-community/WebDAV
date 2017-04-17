@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.Utils.HTTP">
+<TimeCreated>64390,42019.265883</TimeCreated>
+
+<Method name="ts2httpDate">
+<Description>
+Converts timestamp into HTTP date as defined in section 3.3.1 of [RFC2068]
+https://tools.ietf.org/html/rfc2068#section-3.3.1
+RFC 822, updated by RFC 1123 (preferred):  wkday "," SP date SP time SP "GMT"
+Example: Sun, 06 Nov 1994 08:49:37 GMT
+w ##class(WebDav.REST).ts2httpDate("2017-03-31 15:17:59")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ts:%TimeStamp=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	quit:ts="" ""
+	set h = $zdth(ts, 3)
+	set h = $system.Util.LocalWithZTIMEZONEtoUTC(h)
+	set wkday = $zd(h, 11,,,,,,,, 1)
+	set date = $zd(h, 2,,,,,,,, 1)
+	set time = $zt($p(h,",",2),1)
+	quit wkday _ ", " _ date _ " " _ time _ " GMT"
+]]></Implementation>
+</Method>
+
+<Method name="getBase">
+<Description>
+Get WebDAV server root URL</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim %response As %CSP.Response
+	#dim %request As %CSP.Request
+	if $isobject($g(%request)) {
+		set protocol = "http" _ $case(%request.Secure, $$$YES: "s", :"") _"://"
+		set host = %request.GetCgiEnv("HTTP_HOST")
+		set app = %request.Application
+		set:app="/" app = "" 
+	} else {
+		set protocol = "http"
+		set host = "localhost:57772"
+		set app = ""
+	}	
+	quit protocol _ host _ app
+]]></Implementation>
+</Method>
+
+<Method name="serve">
+<Description>
+Return physical file contents
+name - full path to file</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim sc As %Status = $$$OK
+    #dim %response As %CSP.Response
+	//kill %request.Data
+	set %request.Data("STREAMOID",1)= ##class(%CSP.StreamServer).Encrypt(##class(%CSP.StreamServer).GetOidForFile(name))
+	if ##class(%CSP.StreamServer).OnPreHTTP() {
+		set %response.Headers("Content-Disposition")="attachment; filename*=UTF-8''" _ ##class(%CSP.Page).EscapeURL(##class(%File).GetFilename(name), "UTF8")
+		set sc = ##class(%CSP.StreamServer).OnPage()
+	}
+
+	quit sc
+]]></Implementation>
+</Method>
+
+<Method name="getHeader">
+<Description>
+Get HTTP header value</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>header</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim %request As %CSP.Request
+	set value = ""
+	if $isobject($g(%request)) {
+		set header = "HTTP_" _ $zcvt(header, "U")
+		if %request.IsDefinedCgiEnv(header) {
+			set value = %request.GetCgiEnv(header)
+			set value = $zcvt($zcvt(value, "I", "URL"), "I", "UTF8")
+		}
+	}
+	return value
+]]></Implementation>
+</Method>
+
+<Method name="getFileType">
+<Description>
+Determine file mime type
+name - full path to file</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set ext = "/" _ $zcvt($p(name, ".", *),"U") _ "/"
+	do ##class(%CSP.StreamServer).FileClassify(ext, .type , .bin, .charset)
+	if ext = "/RTF/" {
+		set type = "application/rtf"
+	}
+	
+	return type
+]]></Implementation>
+</Method>
+</Class>
+</Export>
