@@ -79,6 +79,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 			set %response.Status = ..#HTTP207MULTISTATUS
 			set depth = ..getHeader("DEPTH", 0)				
 		} else {
+			// Offline debug
 			set depth = 1
 		}
 		
@@ -189,7 +190,7 @@ Moves object</Description>
 	}
 
 	set result = ##class(%File).Rename(path, destPath, .return)
-	set:result=$$$NO sc = $$$ERROR($$$GeneralError, $$$FormatText("Renaiming file %0 into %1 failed, reason: %2", path, destPath, return))
+	set:result=$$$NO sc = $$$ERROR($$$GeneralError, $$$FormatText("Renaiming file %1 into %2 failed, reason: %3", path, destPath, return))
 	do ##class(WebDav.Log).add(path, sc, destPath)
 	quit sc
 ]]></Implementation>
