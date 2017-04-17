@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebDav.Utils.XML">
+<Super>HTTP</Super>
+<TimeCreated>64390,42917.195695</TimeCreated>
+
+<Method name="writeXML">
+<Description>
+Output XML in a mode compliant with WebDAV clients
+obj - is any xml-enabled object</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>obj:%XML.Adaptor</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set w=##class(%XML.Writer).%New()
+	set w.Charset = "UTF-8"
+	set w.DefaultNamespace = "DAV:"
+	do w.AddNamespace("DAV:","D")
+ 	set w.ElementQualified = $$$NO
+ 	set w.Indent=1	
+
+ 	quit w.RootObject(obj)
+]]></Implementation>
+</Method>
+
+<Method name="createPROPFIND">
+<Description>
+Create PROPFIND response for one file or directory.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href,isCollection:%Boolean,size:%Integer=0,createdDate="",modifiedDate=""</FormalSpec>
+<ReturnType>WebDav.XML.response</ReturnType>
+<Implementation><![CDATA[
+	set response = ##class(WebDav.XML.response).%New()
+	do response.href.Insert(..getBase() _ $zcvt($zcvt(href, "O", "UTF8"), "O", "URL"))
+	
+	set propstat = ##class(WebDav.XML.propstat).%New()
+	set propstat.status = "HTTP/1.1 200 OK"
+	
+	set prop = ##class(WebDav.XML.prop).%New()
+	set prop.getlastmodified = ..ts2httpDate(modifiedDate)
+	set prop.creationdate = ##class(%TimeStamp).LogicalToXSD(createdDate)
+	
+	//set displayName = $case(isCollection, 1: $p(href, "/", *), :##class(%File).GetFilename(href))
+	//set prop.displayname = $zcvt($zcvt(displayName,"O","UTF8"),"O","URL")
+	set prop.iscollection = isCollection
+	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
+	set prop.supportedlock = ##class(WebDav.XML.supportedlock).%New()
+	set prop.getcontentlength = size
+		
+	if isCollection {
+		set prop.resourcetype.collection = ##class(WebDav.XML.empty).%New()
+	}
+	
+	set propstat.prop = prop
+	do response.propstat.Insert(propstat)
+	
+	return response
+]]></Implementation>
+</Method>
+
+<Method name="createLOCK">
+<Description>
+Acquire a lock on a file
+w ##class(WebDav.REST).LOCK()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href,token</FormalSpec>
+<ReturnType>WebDav.XML.prop</ReturnType>
+<Implementation><![CDATA[
+	
+	set prop = ##class(WebDav.XML.prop).%New()
+	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
+	
+	set active = ##class(WebDav.XML.activelock).%New()
+	set active.locktype = ##class(WebDav.XML.locktype).%New()
+	set active.lockscope = ##class(WebDav.XML.lockscope).%New()
+	set active.lockscope.exclusive = ##class(WebDav.XML.empty).%New()
+	set active.depth = 0
+	set active.timeout = "Second-3600"
+	
+	set active.owner = ##class(WebDav.XML.owner).%New()
+	set active.owner.content = "ed-pc\eduard"
+	
+	set active.lockroot = ##class(WebDav.XML.lockroot).%New()
+	do active.lockroot.href.Insert(..getBase() _ href)
+	
+	set active.locktoken = ##class(WebDav.XML.locktoken).%New()
+	do active.locktoken.href.Insert(token)
+	
+	//set exclusive = ##class(WebDav.XML.lockentry).%New()
+	//set exclusive.locktype.write = ##class(WebDav.XML.write).%New()
+
+	//set shared = ##class(WebDav.XML.lockentry).%New()
+	//set shared.lockscope.shared = ##class(WebDav.XML.empty).%New()
+	//set shared.locktype.write = ##class(WebDav.XML.write).%New()	
+
+	
+	do prop.lockdiscovery.activelock.Insert(active)
+	
+	quit prop
+]]></Implementation>
+</Method>
+
+<Method name="ts2httpDate">
+<Description>
+Converts timestamp into HTTP date as defined in section 3.3.1 of [RFC2068]
+https://tools.ietf.org/html/rfc2068#section-3.3.1
+RFC 822, updated by RFC 1123 (preferred):  wkday "," SP date SP time SP "GMT"
+Example: Sun, 06 Nov 1994 08:49:37 GMT
+w ##class(WebDav.REST).ts2httpDate("2017-03-31 15:17:59")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ts:%TimeStamp=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	quit:ts="" ""
+	set h = $zdth(ts, 3)
+	set h = $system.Util.LocalWithZTIMEZONEtoUTC(h)
+	set wkday = $zd(h, 11,,,,,,,, 1)
+	set date = $zd(h, 2,,,,,,,, 1)
+	set time = $zt($p(h,",",2),1)
+	quit wkday _ ", " _ date _ " " _ time _ " GMT"
+]]></Implementation>
+</Method>
+</Class>
+</Export>

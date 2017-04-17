@@ -3,13 +3,8 @@
 <Class name="WebDav.REST">
 <Description>
 WebDAV Server Currently serves physical directory structure.</Description>
-<Super>%CSP.REST,WebDav.Utils.HTTP</Super>
+<Super>%CSP.REST,WebDav.Utils.XML</Super>
 <TimeCreated>64370,45626.334444</TimeCreated>
-
-<Parameter name="HTTP200OK">
-<Type>%String</Type>
-<Default>200 OK</Default>
-</Parameter>
 
 <Parameter name="HTTP207MULTISTATUS">
 <Type>%String</Type>
@@ -112,112 +107,6 @@ Chech if client is allowed to make this request</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="PROPFIND">
-<Description>
-PROPFIND request is used to retrieve properties, stored as XML, from a web resource.
-It is also overloaded to allow one to retrieve the collection structure (a.k.a. directory hierarchy) of a remote system.
-w ##class(WebDav.REST).PROPFIND()</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>href</FormalSpec>
-<Implementation><![CDATA[
-	#dim %response As %CSP.Response
-	#dim %request As %CSP.Request
-	
-	set path = ..href2path(href)
-	//do ##class(WebDav.Log).add("PROPFIND", href, path, ##class(%File).Exists(path))
-	if ##class(%File).Exists(path) {
-		set depth = 1
-		if $isobject($g(%request)) {
-			set %response.Status = ..#HTTP207MULTISTATUS
-			
-			set depth = %request.GetCgiEnv("HTTP_DEPTH", 0)				
-		}
-		set isCollection = ..isCollection(href)
-		set size = $case(isCollection, $$$YES:0, :##class(%File).GetFileSize(path))
-			
-		set multi = ##class(WebDav.XML.multistatus).%New()
-		do multi.response.Insert(..createResponse(href, size))
-		
-		if isCollection,depth {		
-			#dim rs As %ResultSet = ##class(%File).FileSetFunc(path)
-
-			while (rs.%Next()) {
-				set path = rs.Name		
-				set name = rs.ItemName
-				set size =rs.Size
-				set createdDate = rs.DateCreated
-				set modifiedDate = rs.DateModified
-				
-				do multi.response.Insert(..createResponse(href _ "/" _ name, size, createdDate, modifiedDate))
-			}
-		}
-		
-		set sc = ..writeXML(multi)
-
-	} else {
-		set %response.Status =  ..#HTTP404NOTFOUND
-		set sc = $$$OK
-	}
-	quit sc
-]]></Implementation>
-</Method>
-
-<Method name="writeXML">
-<Description>
-Output XML in a mode compliant with WebDAV clients
-obj - is any xml-enabled object</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>obj:%XML.Adaptor</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	set w=##class(%XML.Writer).%New()
-	set w.Charset = "UTF-8"
-	set w.DefaultNamespace = "DAV:"
-	do w.AddNamespace("DAV:","D")
- 	set w.ElementQualified = $$$NO
- 	set w.Indent=1	
-
- 	quit w.RootObject(obj)
-]]></Implementation>
-</Method>
-
-<Method name="createResponse">
-<Description>
-Create PROPFIND response for one file or directory.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>href,size:%Integer=0,createdDate="",modifiedDate=""</FormalSpec>
-<ReturnType>WebDav.XML.response</ReturnType>
-<Implementation><![CDATA[
-	set isCollection = ..isCollection(href)
-	
-	set response = ##class(WebDav.XML.response).%New()
-	do response.href.Insert(..getBase() _ $zcvt($zcvt(href, "O", "UTF8"), "O", "URL"))
-	
-	set propstat = ##class(WebDav.XML.propstat).%New()
-	set propstat.status = "HTTP/1.1 " _ ..#HTTP200OK
-	
-	set prop = ##class(WebDav.XML.prop).%New()
-	set prop.getlastmodified = ..ts2httpDate(modifiedDate)
-	set prop.creationdate = ##class(%TimeStamp).LogicalToXSD(createdDate)
-	
-	//set displayName = $case(isCollection, 1: $p(href, "/", *), :##class(%File).GetFilename(href))
-	//set prop.displayname = $zcvt($zcvt(displayName,"O","UTF8"),"O","URL")
-	set prop.iscollection = isCollection
-	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
-	set prop.supportedlock = ##class(WebDav.XML.supportedlock).%New()
-	set prop.getcontentlength = size
-		
-	if isCollection {
-		set prop.resourcetype.collection = ##class(WebDav.XML.empty).%New()
-	}
-	
-	set propstat.prop = prop
-	do response.propstat.Insert(propstat)
-	
-	return response
-]]></Implementation>
-</Method>
-
 <Method name="href2path">
 <Description>
 Convert request href into physical path</Description>
@@ -241,6 +130,58 @@ Check if requested object is a directory or a file</Description>
 <FormalSpec>href</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[	return ##class(%File).DirectoryExists(..href2path(href))
+]]></Implementation>
+</Method>
+
+<Method name="PROPFIND">
+<Description>
+PROPFIND request is used to retrieve properties, stored as XML, from a web resource.
+It is also overloaded to allow one to retrieve the collection structure (a.k.a. directory hierarchy) of a remote system.
+w ##class(WebDav.REST).PROPFIND()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>href</FormalSpec>
+<Implementation><![CDATA[
+	#dim %response As %CSP.Response
+	#dim %request As %CSP.Request
+	
+	set path = ..href2path(href)
+	//do ##class(WebDav.Log).add("PROPFIND", href, path, ##class(%File).Exists(path))
+	if ##class(%File).Exists(path) {
+		set depth = 1
+		if $isobject($g(%request)) {
+			set %response.Status = ..#HTTP207MULTISTATUS
+			
+			set depth = ..getHeader("DEPTH", 0)				
+		}
+		set isCollection = ..isCollection(href)
+		set size = $case(isCollection, $$$YES:0, :##class(%File).GetFileSize(path))
+			
+		set multi = ##class(WebDav.XML.multistatus).%New()
+		do multi.response.Insert(..createPROPFIND(href, isCollection, size))
+		
+		if isCollection,depth {		
+			#dim rs As %ResultSet = ##class(%File).FileSetFunc(path)
+
+			while (rs.%Next()) {
+				set path = rs.Name		
+				set name = rs.ItemName
+				set size =rs.Size
+				set createdDate = rs.DateCreated
+				set modifiedDate = rs.DateModified
+				set type = rs.Type
+				set isCollection = $case(type, "F":$$$NO, "D":$$$YES, :$$$NO)
+					
+				do multi.response.Insert(..createPROPFIND(href _ "/" _ name, isCollection, size, createdDate, modifiedDate))
+			}
+		}
+		
+		set sc = ..writeXML(multi)
+
+	} else {
+		set %response.Status =  ..#HTTP404NOTFOUND
+		set sc = $$$OK
+	}
+	quit sc
 ]]></Implementation>
 </Method>
 
@@ -370,6 +311,7 @@ Called befor GET to receive information about a file</Description>
 Update file contents. Always completely rewrites the file </Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim sc As %Status = $$$OK
 	#dim %response As %CSP.Response
@@ -394,40 +336,12 @@ Update file contents. Always completely rewrites the file </Description>
 Acquire a lock on a file
 w ##class(WebDav.REST).LOCK()</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>href="/2/1.txt"</FormalSpec>
+<FormalSpec>href</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	set token = "opaquelocktoken:" _ $System.Util.CreateGUID()
 	do %response.SetHeader("Lock-Token", token)
-	
-	set prop = ##class(WebDav.XML.prop).%New()
-	set prop.lockdiscovery = ##class(WebDav.XML.lockdiscovery).%New()
-	
-	set active = ##class(WebDav.XML.activelock).%New()
-	set active.locktype = ##class(WebDav.XML.locktype).%New()
-	set active.lockscope = ##class(WebDav.XML.lockscope).%New()
-	set active.lockscope.exclusive = ##class(WebDav.XML.empty).%New()
-	set active.depth = 0
-	set active.timeout = "Second-3600"
-	
-	set active.owner = ##class(WebDav.XML.owner).%New()
-	set active.owner.content = "ed-pc\eduard"
-	
-	set active.lockroot = ##class(WebDav.XML.lockroot).%New()
-	do active.lockroot.href.Insert(..getBase() _ href)
-	
-	set active.locktoken = ##class(WebDav.XML.locktoken).%New()
-	do active.locktoken.href.Insert(token)
-	
-	//set exclusive = ##class(WebDav.XML.lockentry).%New()
-	//set exclusive.locktype.write = ##class(WebDav.XML.write).%New()
-
-	//set shared = ##class(WebDav.XML.lockentry).%New()
-	//set shared.lockscope.shared = ##class(WebDav.XML.empty).%New()
-	//set shared.locktype.write = ##class(WebDav.XML.write).%New()	
-
-	
-	do prop.lockdiscovery.activelock.Insert(active)
-	
+	set prop = ##class(WebDav.Utils.XML).createLOCK(href,  token)	
 	quit ..writeXML(prop)
 ]]></Implementation>
 </Method>

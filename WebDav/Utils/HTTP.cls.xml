@@ -26,7 +26,7 @@ w ##class(WebDav.REST).ts2httpDate("2017-03-31 15:17:59")</Description>
 
 <Method name="getBase">
 <Description>
-Get WebDAV server root URL</Description>
+Get current application root URL without trailing slash</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
@@ -71,11 +71,11 @@ name - full path to file</Description>
 <Description>
 Get HTTP header value</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>header</FormalSpec>
+<FormalSpec>header,default=""</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	#dim %request As %CSP.Request
-	set value = ""
+	set value = default
 	if $isobject($g(%request)) {
 		set header = "HTTP_" _ $zcvt(header, "U")
 		if %request.IsDefinedCgiEnv(header) {
