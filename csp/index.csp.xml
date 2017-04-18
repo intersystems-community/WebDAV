@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-<CSP name="index.csp" application="/csp/webdav/"><![CDATA[
+<CSP name="index.csp" application="/csp/webdav/" default="1"><![CDATA[
 <html>
 <head>
 <title>	Test WebDAV Page</title>
@@ -8,9 +8,8 @@
 </head>
 
 <body>
-<!--<button onclick="window.open('#(##class(WebDav.REST).getBase())#\2\1.docx', '_blank')">Edit</button><br>-->
-<a href="#(##class(WebDav.REST).getBase())#/2/1.docx">RO document windows/linux</a><br>
-<a href="ms-word:ofe|u|#(##class(WebDav.REST).getBase())#/2/1.docx">RW windows</a><br>
+<a href="#(##class(WebDav.REST).getServer())#/2/1.docx">RO document windows/linux</a><br>
+<a href="ms-word:ofe|u|#(##class(WebDav.REST).getServer())#/2/1.docx">RW windows</a><br>
 <a href="dav://#(%request.GetCgiEnv("HTTP_HOST"))#/2/1.docx">RW linux (LibreOffice possibly)</a><br>
 <a href="ms-word:ofe|u|http://#(%request.GetCgiEnv("SERVER_NAME"))#/2/1.docx">RW windows IIS</a><br>
 <a href="dav://#(%request.GetCgiEnv("SERVER_NAME"))#/2/1.docx">RW linux IIS</a><br>

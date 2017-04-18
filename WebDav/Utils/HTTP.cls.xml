@@ -32,17 +32,35 @@ Get current application root URL without trailing slash</Description>
 <Implementation><![CDATA[
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
+	
+	set server = ..getServer()
+	
 	if $isobject($g(%request)) {
-		set protocol = "http" _ $case(%request.Secure, $$$YES: "s", :"") _"://"
-		set host = %request.GetCgiEnv("HTTP_HOST")
 		set app = %request.Application
 		set:app="/" app = "" 
 	} else {
-		set protocol = "http"
-		set host = "localhost:57772"
 		set app = ""
 	}	
-	quit protocol _ host _ app
+	quit server _ app
+]]></Implementation>
+</Method>
+
+<Method name="getServer">
+<Description>
+Get current server root URL without trailing slash</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim %response As %CSP.Response
+	#dim %request As %CSP.Request
+	if $isobject($g(%request)) {
+		set protocol = "http" _ $case(%request.Secure, $$$YES: "s", :"") _"://"
+		set host = %request.GetCgiEnv("HTTP_HOST")
+	} else {
+		set protocol = "http"
+		set host = "localhost:57772"
+	}	
+	quit protocol _ host
 ]]></Implementation>
 </Method>
 
