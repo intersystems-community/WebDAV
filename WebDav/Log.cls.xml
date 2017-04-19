@@ -50,6 +50,16 @@ do ##class(WebDav.Log).%KillExtent()</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="purge">
+<Description>
+do ##class(WebDav.Log).purge()</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	do ##class(WebDav.Log).%KillExtent()
+	do ##class(WebDav.Log.Request).%KillExtent()
+]]></Implementation>
+</Method>
+
 <Method name="%OnNew">
 <FormalSpec>path="",result="",comment=""</FormalSpec>
 <Private>1</Private>
