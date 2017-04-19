@@ -78,7 +78,7 @@ w ##class(WebDav.REST).LOCK()</Description>
 	set active.timeout = "Second-3600"
 	
 	set active.owner = ##class(WebDav.XML.owner).%New()
-	set active.owner.content = "ed-pc\eduard"
+	set active.owner.content = ..getLockOwner()
 	
 	set active.lockroot = ##class(WebDav.XML.lockroot).%New()
 	do active.lockroot.href.Insert(..getBase() _ href)
@@ -97,6 +97,29 @@ w ##class(WebDav.REST).LOCK()</Description>
 	do prop.lockdiscovery.activelock.Insert(active)
 	
 	quit prop
+]]></Implementation>
+</Method>
+
+<Method name="getLockOwner">
+<Description>
+Evaluate LOCK request stream and get an owner</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set owner = "owner"	
+	if (($isObject($g(%request))) && ($isobject(%request.Content))) {
+		set sc = ##class(%XML.XPATH.Document).CreateFromStream(%request.Content, .doc)
+		quit:$$$ISERR(sc)
+		set sc = doc.EvaluateExpression("/", "/D:lockinfo/D:owner/D:href/text()", .results)
+		quit:$$$ISERR(sc)
+		#dim result As %XML.XPATH.ValueResult
+		set result = results.GetAt(1)
+		if $isObject(result) {
+			set owner = result.Value
+		}
+	}
+	
+	quit owner
 ]]></Implementation>
 </Method>
 
