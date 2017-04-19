@@ -28,6 +28,12 @@ Root folder for a WebDAV server. Should be set without trailing slash</Descripti
 <Default>^WebDav.Settings("Folder")</Default>
 </Parameter>
 
+<Parameter name="ROOTREDIRECT">
+<Description>
+Redirect from root GET request </Description>
+<Default>/csp/webdav/index.csp</Default>
+</Parameter>
+
 <Method name="OnPreDispatch">
 <Description>
 This method Gets called prior to dispatch of the request. Put any common code here

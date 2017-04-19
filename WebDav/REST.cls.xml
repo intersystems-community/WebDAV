@@ -124,6 +124,11 @@ Retrieve file contents</Description>
 <Implementation><![CDATA[
 	#dim %response As %CSP.Response
 	#dim %request As %CSP.Request
+	if (((href = "/") || (href = "")) && (..#ROOTREDIRECT '= "")) {
+		set %response.Redirect = ..#ROOTREDIRECT
+		return $$$OK
+	}
+	
 	set path = ..href2path(href)
 	set sc = ..serve(path)
 	do ##class(WebDav.Log).add(path, sc)
