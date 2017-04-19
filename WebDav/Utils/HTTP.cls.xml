@@ -37,11 +37,14 @@ Get current application root URL without trailing slash</Description>
 	
 	if $isobject($g(%request)) {
 		set app = %request.Application
-		set:app="/" app = "" 
+		if $e(app, *)="/" {
+			set app = $e(app, 1, *-1)
+		}
 	} else {
 		set app = ""
-	}	
-	quit server _ app
+	}
+	set base = server _ app
+	quit base
 ]]></Implementation>
 </Method>
 

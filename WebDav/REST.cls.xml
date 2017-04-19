@@ -178,7 +178,13 @@ Moves object</Description>
 	set path = ..href2path(href)
 	
 	set dest = ..getHeader("DESTINATION")
-	set destHref = $p(dest, ..getBase(), 2, *)
+	
+	// For example
+	// ..getBase() = "http://192.168.126.1:57772/webdav"
+	//        dest = "http://192.168.126.1:57772/WebDAV/2/1.docx"
+	// Results in
+	//    destHref = "/2/1.docx"
+	set destHref = $e(dest, $find($zcvt(dest,"l"), $zcvt(..getBase(), "l")), *)
 	set destPath =..href2path(destHref)
 	
 	/// If a resource exists at the destination and the Overwrite header is "T", then prior to performing the move, 
