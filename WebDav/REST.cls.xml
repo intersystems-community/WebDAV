@@ -101,7 +101,7 @@ w ##class(WebDav.REST).PROPFIND()</Description>
 				set type = rs.Type
 				set isCollection = $case(type, "F":$$$NO, "D":$$$YES, :$$$NO)
 					
-				do multi.response.Insert(..createPROPFIND(href _ "/" _ name, isCollection, size, createdDate, modifiedDate))
+				do multi.response.Insert(..createPROPFIND(href _ $case($e(href,*), "/":"", :"/") _ name, isCollection, size, createdDate, modifiedDate))
 			}
 		}
 		
