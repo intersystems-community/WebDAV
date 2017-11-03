@@ -142,7 +142,19 @@ PROPPATCH is used to update object properties</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>href</FormalSpec>
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	quit $$$OK
+<Implementation><![CDATA[
+    // TODO: define correct PROPPATCH in WebDav library
+    //set sc = ##class(Webdav.REST).PROPPATCH(href)
+
+    // Response template. Only needed fields. For full list of fields see RFC 4918.
+    set multi = ##class(WebDav.XML.multistatus).%New()
+    do multi.response.Insert(##class(Webdav.XML.response).%New())
+    set sc = ##class(Webdav.Utils.XML).writeXML(multi)
+
+    // These lines are project specific
+    //set attach = ..getAttachObjectById(..getAttachIdByHref(href))
+    //set sc = ##class(Webdav.Log).add(attach.linkedFileName, sc)
+    quit sc
 ]]></Implementation>
 </Method>
 

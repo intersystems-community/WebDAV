@@ -116,8 +116,9 @@ name - full path to file</Description>
 <FormalSpec>name</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	set ext = "/" _ $zcvt($p(name, ".", *),"U") _ "/"
+	set ext = $zcvt($p(name, ".", *), "U")
 	do ##class(%CSP.StreamServer).FileClassify(ext, .type , .bin, .charset)
+	set ext = "/" _ ext _ "/"
 	if ext = "/RTF/" {
 		set type = "application/rtf"
 	}
